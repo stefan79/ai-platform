@@ -62,7 +62,6 @@
     "@nx/vite",
     "@nx/eslint",
     "@nx/jest",
-    "@nx/tailwind"
   ],
   "tasksRunnerOptions": {
     "default": {
@@ -79,7 +78,8 @@
   },
   "defaultBase": "main",
   "projects": {
-    "server": "apps/server",
+    "server-ws": "apps/server-ws",
+    "server-rest": "apps/server-rest",
     "client": "apps/client",
     "context-core": "libs/context-core",
     "protocol-rest": "libs/protocol-rest",

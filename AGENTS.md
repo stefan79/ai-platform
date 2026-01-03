@@ -14,12 +14,13 @@ Build a dynamic chat platform with:
 - Full native import map dynamism (use SystemJS import maps).
 
 ## Repo layout (target)
-- `apps/server`: server, WS + REST, plugin runtime.
+- `apps/server-ws`: WS server + plugin runtime.
+- `apps/server-rest`: REST server.
 - `apps/client`: React shell, SystemJS loader, state + slots.
 - `packages/protocol`: shared WS/REST schemas and TS types.
 - `packages/ui-core`: reusable UI components and theming.
-- `apps/server/plugins-workspace`: git-managed plugin sources.
-- `apps/server/plugins-dist`: built plugin artifacts served to clients.
+- `apps/server-ws/plugins-workspace`: git-managed plugin sources.
+- `apps/server-ws/plugins-dist`: built plugin artifacts served to clients.
 
 ## Repo conventions
 - Use Nx commands via `pnpx nx`.

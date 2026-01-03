@@ -8,6 +8,7 @@
   },
   "scripts": {
     "nx": "nx",
+    "dev": "NX_DAEMON=false pnpm nx run-many -t serve -p server-rest,server-ws,client --parallel --nx-bail --output-style=stream",
     "lint": "pnpm nx lint",
     "test": "pnpm nx test",
     "build": "pnpm nx build",
@@ -30,7 +31,6 @@
     "@nx/js": "22.3.3",
     "@nx/node": "22.3.3",
     "@nx/react": "22.3.3",
-    "@nx/tailwind": "22.3.3",
     "@nx/vite": "22.3.3",
     "@nx/web": "22.3.3",
     "@testing-library/jest-dom": "^6.4.2",
@@ -57,6 +57,7 @@
     "tailwindcss": "^3.4.14",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^1.6.0"

@@ -18,7 +18,7 @@ Core message types (initial):
 - Server → Client: `server.hello`, `thread.snapshot`, `thread.patch`, `turn.start`, `turn.delta`, `turn.end`,
   `ui.state.patch`, `ui.commands.set`, `ui.plugin.install`, `ui.plugin.update`, `ui.plugin.disable`
 
-## apps/server/runtime
+## apps/server-ws/runtime
 ### Handler runtime
 Each WS connection has a handler stack:
 - Router dispatches to top-of-stack handler.
@@ -60,7 +60,7 @@ Lifecycle:
 - On success: reload server plugin, send `ui.plugin.update`
 - Clients: dispose, `System.delete`, re-import, re-register
 
-## apps/server/tools
+## apps/server-ws/tools
 ### Authoring tools (privileged)
 Tools must:
 1) write to `plugins-workspace/`

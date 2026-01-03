@@ -3,7 +3,7 @@ import { pathsToModuleNameMapper } from 'ts-jest';
 import { compilerOptions } from '../../tsconfig.base.json';
 
 const config: Config = {
-  displayName: 'server',
+  displayName: 'server-ws',
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/?(*.)+(spec|test).[tj]s'],

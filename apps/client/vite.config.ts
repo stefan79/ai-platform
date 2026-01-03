@@ -6,25 +6,28 @@ export default defineConfig({
   root: __dirname,
   plugins: [react()],
   resolve: {
-    alias: {
-      '@ai-platform/context-core': path.resolve(
-        __dirname,
-        '../../libs/context-core/src/index.ts'
-      ),
-      '@ai-platform/protocol-rest': path.resolve(
-        __dirname,
-        '../../libs/protocol-rest/src/index.ts'
-      ),
-      '@ai-platform/protocol-ws': path.resolve(__dirname, '../../libs/protocol-ws/src/index.ts'),
-      '@ai-platform/design-tokens': path.resolve(
-        __dirname,
-        '../../libs/design-tokens/src/index.ts'
-      ),
-      '@ai-platform/design-tokens/styles.css': path.resolve(
-        __dirname,
-        '../../libs/design-tokens/src/styles.css'
-      )
-    }
+    alias: [
+      {
+        find: /^@ai-platform\/design-tokens\/styles\.css$/,
+        replacement: path.resolve(__dirname, '../../libs/design-tokens/src/styles.css')
+      },
+      {
+        find: /^@ai-platform\/design-tokens$/,
+        replacement: path.resolve(__dirname, '../../libs/design-tokens/src/index.ts')
+      },
+      {
+        find: /^@ai-platform\/context-core$/,
+        replacement: path.resolve(__dirname, '../../libs/context-core/src/index.ts')
+      },
+      {
+        find: /^@ai-platform\/protocol-rest$/,
+        replacement: path.resolve(__dirname, '../../libs/protocol-rest/src/index.ts')
+      },
+      {
+        find: /^@ai-platform\/protocol-ws$/,
+        replacement: path.resolve(__dirname, '../../libs/protocol-ws/src/index.ts')
+      }
+    ]
   },
   server: {
     port: 4300,

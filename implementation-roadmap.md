@@ -24,7 +24,7 @@
 
 ### Artifacts
 - `packages/protocol` with Zod schemas for envelope + core message types.
-- `apps/server` + `apps/client` scaffold.
+- `apps/server-rest`, `apps/server-ws` + `apps/client` scaffold.
 
 ---
 

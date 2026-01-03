@@ -4,7 +4,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stefan79/ai-platform.git"
+    "url": "git@github.com:stefan79/ai-platform.git"
   },
   "scripts": {},
   "private": true,

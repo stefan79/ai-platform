@@ -1,6 +1,6 @@
-# Implementation Roadmap — Dynamic Chat Platform (Bun + Elysia + React + SystemJS)
+# Implementation Roadmap — Dynamic Chat Platform (Node.js + React + SystemJS)
 
-**Goal:** deliver a turn-based WebSocket chat platform with server-controlled UI state, pluggable backend handlers, and runtime-loadableReceiving UI microfrontends, plus an “authoring” workflow that generates/validates/builds plugins before activation.
+**Goal:** deliver a turn-based WebSocket chat platform with server-controlled UI state, pluggable backend handlers, and runtime-loadable UI microfrontends, plus an “authoring” workflow that generates/validates/builds plugins before activation.
 
 **Release policy:** Semantic Versioning (SemVer)
 - **MAJOR**: breaking changes to WS protocol envelope, plugin interfaces, persistent data models, or client slot contracts.
@@ -12,8 +12,8 @@
 ## v0.1.0 — Bootstrap: WS echo + minimal React shell
 
 ### Scope
-- Bun server starts, serves static assets + index.html.
-- Elysia WebSocket endpoint `/ws` accepts connections.
+- Node.js server starts, serves static assets + index.html.
+- WebSocket endpoint `/ws` accepts connections.
 - Minimal React chat shell connects, shows connection status.
 - Basic turn submission (`turn.submit`) and server echo response.
 

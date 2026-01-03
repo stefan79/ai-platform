@@ -1,7 +1,11 @@
 {
-  "name": "@ai-platform/source",
-  "version": "0.0.0",
+  "name": "@ai-platform/ai-platform",
+  "version": "0.0.1",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stefan79/ai-platform.git"
+  },
   "scripts": {},
   "private": true,
   "dependencies": {},

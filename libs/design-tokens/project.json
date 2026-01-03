@@ -1,0 +1,27 @@
+{
+  "name": "design-tokens",
+  "root": "libs/design-tokens",
+  "sourceRoot": "libs/design-tokens/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/design-tokens"],
+      "options": {
+        "command": "bash -c \"pnpm exec tsc -p libs/design-tokens/tsconfig.lib.json && mkdir -p dist/libs/design-tokens && cp libs/design-tokens/tailwind.preset.cjs dist/libs/design-tokens/tailwind.preset.cjs && cp libs/design-tokens/src/styles.css dist/libs/design-tokens/styles.css\""
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/design-tokens/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/design-tokens/vitest.config.ts"
+      }
+    }
+  }
+}

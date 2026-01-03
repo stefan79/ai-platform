@@ -1,0 +1,33 @@
+{
+  "name": "client",
+  "root": "apps/client",
+  "sourceRoot": "apps/client/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/client"],
+      "options": {
+        "command": "pnpm exec vite build --config apps/client/vite.config.ts"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vite dev --config apps/client/vite.config.ts --host"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"apps/client/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config apps/client/vite.config.ts"
+      }
+    }
+  }
+}

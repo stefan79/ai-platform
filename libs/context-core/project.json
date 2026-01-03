@@ -1,0 +1,27 @@
+{
+  "name": "context-core",
+  "root": "libs/context-core",
+  "sourceRoot": "libs/context-core/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/context-core"],
+      "options": {
+        "command": "pnpm exec tsc -p libs/context-core/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/context-core/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/context-core/vitest.config.ts"
+      }
+    }
+  }
+}

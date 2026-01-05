@@ -36,4 +36,4 @@ jobs:
       - name: Build
         run: pnpm nx run-many --target=build --all
       - name: Format check
-        run: pnpm nx format:check
+        run: pnpm nx format:check --all

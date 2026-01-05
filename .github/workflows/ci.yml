@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NX_ISOLATE_PLUGINS: false
+      NX_DAEMON: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,10 +28,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
       - name: Lint
-        run: pnpm nx lint
+        run: pnpm nx run-many --target=lint --all
       - name: Test
-        run: pnpm nx test
+        run: pnpm nx run-many --target=test --all
       - name: Build
-        run: pnpm nx build
+        run: pnpm nx run-many --target=build --all
       - name: Format check
         run: pnpm nx format:check

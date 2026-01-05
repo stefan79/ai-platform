@@ -61,7 +61,7 @@
     "@nx/react",
     "@nx/vite",
     "@nx/eslint",
-    "@nx/jest",
+    "@nx/jest"
   ],
   "tasksRunnerOptions": {
     "default": {

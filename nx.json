@@ -76,7 +76,7 @@
       }
     }
   },
-  "defaultBase": "HEAD~1",
+  "defaultBase": "main",
   "projects": {
     "server-ws": "apps/server-ws",
     "server-rest": "apps/server-rest",

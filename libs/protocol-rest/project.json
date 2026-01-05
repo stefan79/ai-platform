@@ -1,0 +1,27 @@
+{
+  "name": "protocol-rest",
+  "root": "libs/protocol-rest",
+  "sourceRoot": "libs/protocol-rest/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/protocol-rest"],
+      "options": {
+        "command": "pnpm exec tsc -p libs/protocol-rest/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/protocol-rest/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/protocol-rest/vitest.config.ts"
+      }
+    }
+  }
+}

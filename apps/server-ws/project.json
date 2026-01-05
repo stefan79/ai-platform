@@ -1,0 +1,40 @@
+{
+  "name": "server-ws",
+  "root": "apps/server-ws",
+  "sourceRoot": "apps/server-ws/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/server-ws"],
+      "options": {
+        "command": "pnpm exec tsc -p apps/server-ws/tsconfig.app.json"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_ENV=development pnpm exec tsx watch --tsconfig apps/server-ws/tsconfig.app.json apps/server-ws/src/main.ts"
+      }
+    },
+    "serve:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node dist/apps/server-ws/main.js"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"apps/server-ws/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec jest --config apps/server-ws/jest.config.ts"
+      }
+    }
+  }
+}

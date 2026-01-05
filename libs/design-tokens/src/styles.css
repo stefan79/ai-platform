@@ -1,0 +1,16 @@
+:root {
+  color-scheme: dark;
+  --color-background: #0b1021;
+  --color-surface: #10142b;
+  --color-border: #202544;
+  --color-text: #e8e9f1;
+  --color-text-muted: #c3c6d8;
+  --color-accent: #7c3aed;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}

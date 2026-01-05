@@ -1,0 +1,27 @@
+{
+  "name": "protocol-ws",
+  "root": "libs/protocol-ws",
+  "sourceRoot": "libs/protocol-ws/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/protocol-ws"],
+      "options": {
+        "command": "pnpm exec tsc -p libs/protocol-ws/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/protocol-ws/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/protocol-ws/vitest.config.ts"
+      }
+    }
+  }
+}

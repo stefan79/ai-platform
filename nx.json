@@ -1,13 +1,54 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "npmScope": "ai-platform",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
+  },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
-    "sharedGlobals": []
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
+    "sharedGlobals": [
+      "{workspaceRoot}/.eslintrc.json",
+      "{workspaceRoot}/.prettierrc",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "lint": {
+      "inputs": ["default", "^default"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "inputs": ["default", "^default"]
+    },
+    "format:check": {
+      "inputs": ["default", "^default"]
+    }
+  },
+  "plugins": ["@nx/js", "@nx/node", "@nx/react", "@nx/vite", "@nx/eslint", "@nx/jest"],
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "format:check"]
+      }
+    }
+  },
+  "defaultBase": "main",
+  "projects": {
+    "server-ws": "apps/server-ws",
+    "server-rest": "apps/server-rest",
+    "client": "apps/client",
+    "context-core": "libs/context-core",
+    "protocol-rest": "libs/protocol-rest",
+    "protocol-ws": "libs/protocol-ws",
+    "design-tokens": "libs/design-tokens"
   }
 }

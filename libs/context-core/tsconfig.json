@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "outDir": "../../dist/libs/context-core"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "tmp", "node_modules"]
+}

@@ -13,6 +13,7 @@
     "strict": true,
     "target": "es2021",
     "module": "commonjs",
+    "noEmit": true,
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "esModuleInterop": true,

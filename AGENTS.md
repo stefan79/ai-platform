@@ -32,6 +32,7 @@ Build a dynamic chat platform with:
 - Use Context7 for templates and documentation lookups.
 - Use the GitHub MCP server for repo management tasks.
 - Use the NX MCP server as listed below for development tasks.
+- Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 
 ## Detailed specs
 - See `subagents.md` for detailed protocol/runtime/plugin/test requirements and implementation notes.

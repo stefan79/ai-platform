@@ -6,6 +6,7 @@ export default defineConfig({
   root: __dirname,
   plugins: [react()],
   resolve: {
+    extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
     alias: [
       {
         find: /^@ai-platform\/design-tokens\/styles\.css$/,

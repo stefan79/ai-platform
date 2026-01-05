@@ -2,8 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/apps/server-ws",
-    "rootDir": "./src",
-    "resolveJsonModule": true
+    "rootDir": "../../",
+    "resolveJsonModule": true,
+    "noEmit": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]

@@ -10,7 +10,12 @@ const config: Config = {
   testMatch: ['**/?(*.)+(spec|test).[tj]s'],
   moduleFileExtensions: ['ts', 'js', 'json'],
   transform: {
-    '^.+\\.[tj]s$': 'ts-jest'
+    '^.+\\.[tj]s$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json'
+      }
+    ]
   },
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths ?? {}, {
     prefix: '<rootDir>/../..'

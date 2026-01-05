@@ -24,6 +24,7 @@ Build a dynamic chat platform with:
 
 ## Repo conventions
 - Use Nx commands via `pnpx nx`.
+- When running Nx commands, add `--output-style=stream` so logs are visible.
 - Use `pnpm`/`pnpx` (no `npm`/`npx`).
 - Keep TypeScript as the default language.
 - Prefer Nx generators for new apps/libs.

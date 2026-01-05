@@ -1,4 +1,9 @@
-import { designTokens, designTokensClassName, designTokensStylesheet, tailwindPreset } from './index';
+import {
+  designTokens,
+  designTokensClassName,
+  designTokensStylesheet,
+  tailwindPreset,
+} from './index';
 
 describe('design tokens', () => {
   it('exposes palette and references', () => {

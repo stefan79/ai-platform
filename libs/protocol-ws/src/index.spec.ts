@@ -12,7 +12,7 @@ describe('protocol-ws placeholder', () => {
       id: 'abc',
       ts: Date.now(),
       type: 'client.hello',
-      payload: { text: 'hello' }
+      payload: { text: 'hello' },
     };
 
     expect(envelope.payload.text).toBe('hello');

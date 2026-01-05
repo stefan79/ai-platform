@@ -3,7 +3,7 @@ import { createLogger } from './logger';
 
 export function buildServer() {
   const server = Fastify({
-    logger: createLogger()
+    logger: createLogger(),
   });
 
   return server;

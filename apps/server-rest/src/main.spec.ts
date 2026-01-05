@@ -8,7 +8,7 @@ describe('server REST endpoints', () => {
     const app = buildServer(contextState);
     const response = await app.inject({
       method: 'GET',
-      url: '/api/health'
+      url: '/api/health',
     });
 
     expect(response.statusCode).toBe(200);
@@ -19,7 +19,7 @@ describe('server REST endpoints', () => {
     const app = buildServer(contextState);
     const response = await app.inject({
       method: 'GET',
-      url: '/api/version'
+      url: '/api/version',
     });
 
     expect(response.statusCode).toBe(200);

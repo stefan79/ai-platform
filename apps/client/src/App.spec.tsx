@@ -11,8 +11,8 @@ describe('App', () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ status: 'ok', version: '1.0.0' }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      }) as unknown as Response
+        headers: { 'Content-Type': 'application/json' },
+      }) as unknown as Response,
     );
 
     render(<App />);
@@ -28,8 +28,8 @@ describe('App', () => {
   it('surfaces errors when the API fails', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
       new Response('error', {
-        status: 500
-      }) as unknown as Response
+        status: 500,
+      }) as unknown as Response,
     );
 
     render(<App />);

@@ -6,13 +6,8 @@
     "libsDir": "libs"
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
     "sharedGlobals": [
       "{workspaceRoot}/.eslintrc.json",
       "{workspaceRoot}/.prettierrc",
@@ -22,57 +17,27 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ],
-      "outputs": [
-        "{projectRoot}/dist"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "outputs": ["{projectRoot}/dist"]
     },
     "lint": {
-      "inputs": [
-        "default",
-        "^default"
-      ]
+      "inputs": ["default", "^default"]
     },
     "test": {
-      "dependsOn": [
-        "^test"
-      ],
-      "inputs": [
-        "default",
-        "^default"
-      ]
+      "dependsOn": ["^test"],
+      "inputs": ["default", "^default"]
     },
     "format:check": {
-      "inputs": [
-        "default",
-        "^default"
-      ]
+      "inputs": ["default", "^default"]
     }
   },
-  "plugins": [
-    "@nx/js",
-    "@nx/node",
-    "@nx/react",
-    "@nx/vite",
-    "@nx/eslint",
-    "@nx/jest"
-  ],
+  "plugins": ["@nx/js", "@nx/node", "@nx/react", "@nx/vite", "@nx/eslint", "@nx/jest"],
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "format:check"
-        ]
+        "cacheableOperations": ["build", "lint", "test", "format:check"]
       }
     }
   },

@@ -8,7 +8,7 @@ describe('context-core state', () => {
     const state = createContextState({ version: '0.1.0' });
     expect(state).toEqual({
       version: '0.1.0',
-      health: { status: 'ok' }
+      health: { status: 'ok' },
     });
   });
 

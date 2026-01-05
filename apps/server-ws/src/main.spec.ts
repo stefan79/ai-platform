@@ -5,7 +5,7 @@ describe('server-ws', () => {
     const app = buildServer();
     const response = await app.inject({
       method: 'GET',
-      url: '/api/health'
+      url: '/api/health',
     });
 
     expect(response.statusCode).toBe(404);

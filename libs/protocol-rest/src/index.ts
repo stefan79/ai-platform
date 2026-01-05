@@ -4,6 +4,6 @@ export {
   healthResponseSchema,
   parseHealthResponse,
   parseVersionResponse,
-  versionResponseSchema
+  versionResponseSchema,
 } from './schemas';
 export type { HealthResponse, VersionResponse } from './schemas';

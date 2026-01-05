@@ -20,8 +20,8 @@ export interface ContextStateOptions {
 export const createContextState = (options: ContextStateOptions): ContextState => ({
   version: options.version,
   health: {
-    status: options.healthStatus ?? 'ok'
-  }
+    status: options.healthStatus ?? 'ok',
+  },
 });
 
 export const defaultPackageJsonPath = path.resolve(process.cwd(), 'package.json');

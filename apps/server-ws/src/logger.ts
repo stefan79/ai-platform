@@ -5,5 +5,5 @@ export const resolveLogLevel = (nodeEnv: string | undefined): pino.LevelWithSile
 
 export const createLogger = () =>
   pino({
-    level: resolveLogLevel(process.env.NODE_ENV)
+    level: resolveLogLevel(process.env.NODE_ENV),
   });

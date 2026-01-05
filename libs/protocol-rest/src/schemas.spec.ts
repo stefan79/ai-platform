@@ -5,7 +5,7 @@ import {
   createVersionResponse,
   healthResponseSchema,
   parseHealthResponse,
-  parseVersionResponse
+  parseVersionResponse,
 } from './schemas';
 
 describe('protocol-rest schemas', () => {

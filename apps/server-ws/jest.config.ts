@@ -13,13 +13,13 @@ const config: Config = {
     '^.+\\.[tj]s$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.spec.json'
-      }
-    ]
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+      },
+    ],
   },
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths ?? {}, {
-    prefix: '<rootDir>/../..'
-  })
+    prefix: '<rootDir>/../..',
+  }),
 };
 
 export default config;

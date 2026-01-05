@@ -1,7 +1,9 @@
 # AGENTS.md — AI Platform Monorepo
 
 ## Goal
+
 Build a dynamic chat platform with:
+
 - Turn-based conversations over WebSocket and REST.
 - A minimal React shell with runtime‑loaded UI components via SystemJS + import maps.
 - A server runtime that supports pluggable handlers and plugins.
@@ -9,11 +11,13 @@ Build a dynamic chat platform with:
 - A local, Git‑managed plugin workspace with hot reload.
 
 ## Non-goals (initially)
+
 - Multi-tenant SaaS.
 - Running arbitrary untrusted plugins without sandboxing.
 - Full native import map dynamism (use SystemJS import maps).
 
 ## Repo layout (target)
+
 - `apps/server-ws`: WS server + plugin runtime.
 - `apps/server-rest`: REST server.
 - `apps/client`: React shell, SystemJS loader, state + slots.
@@ -23,6 +27,7 @@ Build a dynamic chat platform with:
 - `apps/server-ws/plugins-dist`: built plugin artifacts served to clients.
 
 ## Repo conventions
+
 - Use Nx commands via `pnpx nx`.
 - When running Nx commands, add `--output-style=stream` so logs are visible.
 - Use `pnpm`/`pnpx` (no `npm`/`npx`).
@@ -35,9 +40,11 @@ Build a dynamic chat platform with:
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 
 ## Detailed specs
+
 - See `subagents.md` for detailed protocol/runtime/plugin/test requirements and implementation notes.
 
 ## Module AGENTS.md boilerplate
+
 Add a local `AGENTS.md` to extend/override guidance within a module:
 
 ```
@@ -60,7 +67,6 @@ Add a local `AGENTS.md` to extend/override guidance within a module:
 - File layout: <list>
 - Commands: <pnpx nx ...>
 ```
-
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

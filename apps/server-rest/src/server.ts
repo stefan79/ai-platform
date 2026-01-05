@@ -5,7 +5,7 @@ import { createLogger } from './logger';
 
 export function buildServer(contextState: ContextState) {
   const server = Fastify({
-    logger: createLogger()
+    logger: createLogger(),
   });
 
   server.get('/api/health', async (_request, reply) => {

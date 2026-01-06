@@ -17,6 +17,14 @@ export default defineConfig({
         replacement: path.resolve(__dirname, '../../libs/design-tokens/src/index.ts'),
       },
       {
+        find: /^@effect\/schema\/Schema$/,
+        replacement: path.resolve(__dirname, '../../libs/effect-schema/src/Schema.ts'),
+      },
+      {
+        find: /^@effect\/schema$/,
+        replacement: path.resolve(__dirname, '../../libs/effect-schema/src/index.ts'),
+      },
+      {
         find: /^@ai-platform\/context-core$/,
         replacement: path.resolve(__dirname, '../../libs/context-core/src/index.ts'),
       },

@@ -25,7 +25,9 @@
       "@ai-platform/protocol-rest": ["libs/protocol-rest/src/index.ts"],
       "@ai-platform/protocol-ws": ["libs/protocol-ws/src/index.ts"],
       "@ai-platform/design-tokens": ["libs/design-tokens/src/index.ts"],
-      "@ai-platform/design-tokens/styles.css": ["libs/design-tokens/src/styles.css"]
+      "@ai-platform/design-tokens/styles.css": ["libs/design-tokens/src/styles.css"],
+      "@effect/schema": ["libs/effect-schema/src/index.ts"],
+      "@effect/schema/Schema": ["libs/effect-schema/src/Schema.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -367,7 +367,12 @@ export const messageTimelineModel = model<MessageTimelineState>(
 export const messageBubbleModels: ReadonlyArray<Model<MessageBubbleState>> = [
   model<MessageBubbleState>(
     messageBubbleStateSchema,
-    { messageId: 'm-1', actorRole: 'assistant', timestamp: '2026-01-01T00:00:10Z', status: 'delivered' },
+    {
+      messageId: 'm-1',
+      actorRole: 'assistant',
+      timestamp: '2026-01-01T00:00:10Z',
+      status: 'delivered',
+    },
     ['MessageBubbleFocused', 'MessageBubbleHighlighted'],
   ),
   model<MessageBubbleState>(
@@ -429,12 +434,22 @@ export const composerToolbarModel = model<ComposerToolbarState>(
 export const commandPaletteModel = model<CommandPaletteState>(
   commandPaletteStateSchema,
   { isOpen: false, query: '', results: ['/help', '/assign', '/summarize'], highlightedIndex: 0 },
-  ['CommandPaletteOpened', 'CommandPaletteClosed', 'CommandPaletteQueryChanged', 'CommandPaletteResultSelected'],
+  [
+    'CommandPaletteOpened',
+    'CommandPaletteClosed',
+    'CommandPaletteQueryChanged',
+    'CommandPaletteResultSelected',
+  ],
 );
 
 export const threadOverviewDrawerModel = model<ThreadOverviewDrawerState>(
   threadOverviewDrawerStateSchema,
-  { threadId: 't-1', isOpen: false, sections: ['summary', 'actors', 'files'], activeSectionId: 'summary' },
+  {
+    threadId: 't-1',
+    isOpen: false,
+    sections: ['summary', 'actors', 'files'],
+    activeSectionId: 'summary',
+  },
   ['ThreadOverviewOpened', 'ThreadOverviewClosed', 'ThreadOverviewSectionSelected'],
 );
 

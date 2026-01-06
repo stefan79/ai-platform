@@ -6,7 +6,8 @@ export type Schema<Type> = {
   readonly _type?: Type;
 };
 
-export type To<InputSchema extends Schema<unknown>> = InputSchema extends Schema<infer Type> ? Type : never;
+export type To<InputSchema extends Schema<unknown>> =
+  InputSchema extends Schema<infer Type> ? Type : never;
 
 const schema = <Type>(): Schema<Type> => ({ _tag: 'Schema' });
 
@@ -28,14 +29,20 @@ export function Struct<Fields extends Record<string, Schema<unknown>>>(
   return schema<{ readonly [Key in keyof Fields]: To<Fields[Key]> }>();
 }
 
-export function Array<ItemSchema extends Schema<unknown>>(_item: ItemSchema): Schema<ReadonlyArray<To<ItemSchema>>> {
+export function Array<ItemSchema extends Schema<unknown>>(
+  _item: ItemSchema,
+): Schema<ReadonlyArray<To<ItemSchema>>> {
   return schema<ReadonlyArray<To<ItemSchema>>>();
 }
 
-export function Record<ValueSchema extends Schema<unknown>>(_value: ValueSchema): Schema<Record<string, To<ValueSchema>>> {
+export function Record<ValueSchema extends Schema<unknown>>(
+  _value: ValueSchema,
+): Schema<Record<string, To<ValueSchema>>> {
   return schema<Record<string, To<ValueSchema>>>();
 }
 
-export function Union<Schemas extends ReadonlyArray<Schema<unknown>>>(..._schemas: Schemas): Schema<To<Schemas[number]>> {
+export function Union<Schemas extends ReadonlyArray<Schema<unknown>>>(
+  ..._schemas: Schemas
+): Schema<To<Schemas[number]>> {
   return schema<To<Schemas[number]>>();
 }

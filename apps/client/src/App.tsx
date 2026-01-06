@@ -11,7 +11,15 @@ type CardProps = {
   ariaLabel?: string;
 };
 
-const Card = ({ title, subtitle, children, events = [], footer, layout = 'column', ariaLabel }: CardProps) => (
+const Card = ({
+  title,
+  subtitle,
+  children,
+  events = [],
+  footer,
+  layout = 'column',
+  ariaLabel,
+}: CardProps) => (
   <section
     aria-label={ariaLabel ?? title}
     className="rounded-lg border border-border bg-surface p-4 shadow-md"
@@ -45,7 +53,9 @@ function SidebarToggle({ isCollapsed, isEnabled }: { isCollapsed: boolean; isEna
           State: {isCollapsed ? 'Collapsed' : 'Expanded'} • {isEnabled ? 'Enabled' : 'Disabled'}
         </p>
       </div>
-      <span className="rounded-full bg-border px-3 py-1 text-xs uppercase tracking-wide text-muted">Static</span>
+      <span className="rounded-full bg-border px-3 py-1 text-xs uppercase tracking-wide text-muted">
+        Static
+      </span>
     </div>
   );
 }
@@ -67,7 +77,9 @@ function ThreadListItem({
         <p className="font-medium">{title}</p>
         <p className="text-xs text-muted">{isSelected ? 'Selected thread' : 'Available thread'}</p>
       </div>
-      <span className="rounded-full bg-border px-2 py-1 text-xs text-muted">{unreadCount} unread</span>
+      <span className="rounded-full bg-border px-2 py-1 text-xs text-muted">
+        {unreadCount} unread
+      </span>
     </div>
   );
 }
@@ -76,7 +88,12 @@ function ThreadList() {
   const list = uiModels.threadList.defaultState;
   const items = uiModels.threadItems.map((model) => model.defaultState);
   return (
-    <Card title="ThreadList" subtitle="Sidebar" events={uiModels.threadList.events} ariaLabel="Thread list">
+    <Card
+      title="ThreadList"
+      subtitle="Sidebar"
+      events={uiModels.threadList.events}
+      ariaLabel="Thread list"
+    >
       <div className="flex items-center justify-between text-sm text-muted">
         <span>Filter: &quot;{list.filter || 'none'}&quot;</span>
         <span>Selected: {list.selectedThreadId}</span>
@@ -98,19 +115,29 @@ function ThreadList() {
 function ActorPanel() {
   const state = uiModels.actorPanel.defaultState;
   return (
-    <Card title="ActorPanel" subtitle="Sidebar" events={uiModels.actorPanel.events} ariaLabel="Actor panel">
+    <Card
+      title="ActorPanel"
+      subtitle="Sidebar"
+      events={uiModels.actorPanel.events}
+      ariaLabel="Actor panel"
+    >
       <div className="flex items-center justify-between text-sm text-muted">
         <span>Selected actor: {state.selectedActorId}</span>
         <span>{state.isEditable ? 'Editable' : 'Read only'}</span>
       </div>
       <ul className="space-y-2">
         {state.actors.map((actor) => (
-          <li key={actor.id} className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+          <li
+            key={actor.id}
+            className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+          >
             <div>
               <p className="font-medium">{actor.name}</p>
               <p className="text-xs text-muted">Role: {actor.role}</p>
             </div>
-            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted">{actor.id}</span>
+            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted">
+              {actor.id}
+            </span>
           </li>
         ))}
       </ul>
@@ -121,19 +148,29 @@ function ActorPanel() {
 function FilePanel() {
   const state = uiModels.filePanel.defaultState;
   return (
-    <Card title="FilePanel" subtitle="Sidebar" events={uiModels.filePanel.events} ariaLabel="File panel">
+    <Card
+      title="FilePanel"
+      subtitle="Sidebar"
+      events={uiModels.filePanel.events}
+      ariaLabel="File panel"
+    >
       <div className="flex items-center justify-between text-sm text-muted">
         <span>Selected file: {state.selectedFileId}</span>
         <span>{state.isEditable ? 'Editable' : 'Read only'}</span>
       </div>
       <ul className="space-y-2">
         {state.files.map((file) => (
-          <li key={file.id} className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+          <li
+            key={file.id}
+            className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+          >
             <div>
               <p className="font-medium">{file.name}</p>
               <p className="text-xs text-muted">Status: {file.status}</p>
             </div>
-            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted">{file.id}</span>
+            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted">
+              {file.id}
+            </span>
           </li>
         ))}
       </ul>
@@ -144,7 +181,12 @@ function FilePanel() {
 function SettingsPanel() {
   const state = uiModels.settingsPanel.defaultState;
   return (
-    <Card title="SettingsPanel" subtitle="Sidebar" events={uiModels.settingsPanel.events} ariaLabel="Settings panel">
+    <Card
+      title="SettingsPanel"
+      subtitle="Sidebar"
+      events={uiModels.settingsPanel.events}
+      ariaLabel="Settings panel"
+    >
       <dl className="space-y-2 text-sm">
         <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
           <dt className="text-muted">Theme</dt>
@@ -160,7 +202,8 @@ function SettingsPanel() {
         </div>
       </dl>
       <p className="text-xs text-muted">
-        Dirty keys: {state.dirtyKeys.length ? state.dirtyKeys.join(', ') : 'none'} • {state.isEditable ? 'Editable' : 'Read only'}
+        Dirty keys: {state.dirtyKeys.length ? state.dirtyKeys.join(', ') : 'none'} •{' '}
+        {state.isEditable ? 'Editable' : 'Read only'}
       </p>
     </Card>
   );
@@ -197,7 +240,11 @@ function ThreadHeader() {
     <Card
       title="ThreadHeader"
       subtitle="Main Pane"
-      events={[...uiModels.threadHeader.events, ...uiModels.threadTitle.events, ...uiModels.threadActions.events]}
+      events={[
+        ...uiModels.threadHeader.events,
+        ...uiModels.threadTitle.events,
+        ...uiModels.threadActions.events,
+      ]}
       ariaLabel="Thread header"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -210,11 +257,16 @@ function ThreadHeader() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {actions.availableActions.map((action) => (
-            <span key={action} className="rounded-full border border-border px-3 py-1 text-xs uppercase text-muted">
+            <span
+              key={action}
+              className="rounded-full border border-border px-3 py-1 text-xs uppercase text-muted"
+            >
               {action}
             </span>
           ))}
-          <span className="rounded-full bg-border px-3 py-1 text-xs text-muted">Last: {actions.lastInvokedAction}</span>
+          <span className="rounded-full bg-border px-3 py-1 text-xs text-muted">
+            Last: {actions.lastInvokedAction}
+          </span>
         </div>
       </div>
       <div className="flex items-center justify-between text-sm text-muted">
@@ -242,7 +294,9 @@ function MessageBubble({
         <span>
           {bubble.actorRole} • {bubble.timestamp}
         </span>
-        <span className="rounded-full bg-border px-2 py-1 text-[11px] text-muted">{bubble.status}</span>
+        <span className="rounded-full bg-border px-2 py-1 text-[11px] text-muted">
+          {bubble.status}
+        </span>
       </div>
       <p className="text-sm">{content.content}</p>
       <div className="flex items-center justify-between text-xs text-muted">
@@ -255,8 +309,12 @@ function MessageBubble({
 
 function MessageTimeline() {
   const timeline = uiModels.messageTimeline.defaultState;
-  const bubbles = new Map(uiModels.messageBubbles.map((model) => [model.defaultState.messageId, model.defaultState]));
-  const contents = new Map(uiModels.messageContents.map((model) => [model.defaultState.messageId, model.defaultState]));
+  const bubbles = new Map(
+    uiModels.messageBubbles.map((model) => [model.defaultState.messageId, model.defaultState]),
+  );
+  const contents = new Map(
+    uiModels.messageContents.map((model) => [model.defaultState.messageId, model.defaultState]),
+  );
   const contextMenus = new Map(
     uiModels.messageContextMenus.map((model) => [model.defaultState.messageId, model.defaultState]),
   );
@@ -296,23 +354,32 @@ function Composer() {
     <Card
       title="MessageComposer"
       subtitle="Main Pane"
-      events={[...uiModels.messageComposer.events, ...uiModels.composerInput.events, ...uiModels.composerToolbar.events]}
+      events={[
+        ...uiModels.messageComposer.events,
+        ...uiModels.composerInput.events,
+        ...uiModels.composerToolbar.events,
+      ]}
       ariaLabel="Message composer"
     >
       <div className="rounded-md border border-border bg-background/40 p-3">
         <div className="flex items-center justify-between text-xs text-muted">
-          <span>Draft length: {composer.draftText.length} • Cursor: {input.cursorPosition}</span>
+          <span>
+            Draft length: {composer.draftText.length} • Cursor: {input.cursorPosition}
+          </span>
           <span>Actors: {composer.selectedActors.join(', ')}</span>
         </div>
         <div className="mt-2 rounded-md border border-dashed border-border bg-surface/70 px-3 py-2 text-sm text-muted">
-          ComposerInput: &quot;{input.draftText || 'Empty draft'}&quot; ({input.isFocused ? 'Focused' : 'Blurred'})
+          ComposerInput: &quot;{input.draftText || 'Empty draft'}&quot; (
+          {input.isFocused ? 'Focused' : 'Blurred'})
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {toolbar.availableCommands.map((command) => (
             <span
               key={command}
               className={`rounded-full border px-3 py-1 text-xs uppercase tracking-wide ${
-                toolbar.activeCommandId === command ? 'border-accent text-accent' : 'border-border text-muted'
+                toolbar.activeCommandId === command
+                  ? 'border-accent text-accent'
+                  : 'border-border text-muted'
               }`}
             >
               {command}
@@ -328,19 +395,24 @@ function Composer() {
         <div className="mt-2 flex items-center justify-between text-xs text-muted">
           <span>Open: {palette.isOpen ? 'Yes' : 'No'}</span>
           <span>
-            Query: &quot;{palette.query || 'empty'}&quot; • Highlighted: {palette.highlightedIndex + 1}/{palette.results.length}
+            Query: &quot;{palette.query || 'empty'}&quot; • Highlighted:{' '}
+            {palette.highlightedIndex + 1}/{palette.results.length}
           </span>
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {palette.results.map((result) => (
-            <span key={result} className="rounded-md border border-border px-3 py-1 text-xs text-muted">
+            <span
+              key={result}
+              className="rounded-md border border-border px-3 py-1 text-xs text-muted"
+            >
               {result}
             </span>
           ))}
         </div>
       </div>
       <p className="text-xs text-muted">
-        Submission: {composer.isSubmitting ? 'Pending' : 'Idle'} • Last event: {composer.lastEventId}
+        Submission: {composer.isSubmitting ? 'Pending' : 'Idle'} • Last event:{' '}
+        {composer.lastEventId}
       </p>
     </Card>
   );
@@ -364,7 +436,9 @@ function ThreadOverviewDrawer() {
           <span
             key={section}
             className={`rounded-full border px-3 py-1 text-xs uppercase tracking-wide ${
-              drawer.activeSectionId === section ? 'border-accent text-accent' : 'border-border text-muted'
+              drawer.activeSectionId === section
+                ? 'border-accent text-accent'
+                : 'border-border text-muted'
             }`}
           >
             {section}
@@ -380,7 +454,12 @@ function Sidebar() {
   const toggle = uiModels.sidebarToggle.defaultState;
   return (
     <aside className="space-y-4" aria-label="Sidebar">
-      <Card title="Sidebar" subtitle="Control Panel" events={uiModels.sidebar.events} ariaLabel="Sidebar shell">
+      <Card
+        title="Sidebar"
+        subtitle="Control Panel"
+        events={uiModels.sidebar.events}
+        ariaLabel="Sidebar shell"
+      >
         <div className="flex items-center justify-between text-sm text-muted">
           <span>Collapsed: {sidebar.isCollapsed ? 'Yes' : 'No'}</span>
           <span>Active panel: {sidebar.activePanel}</span>
@@ -443,8 +522,12 @@ function OverlayManager() {
       events={uiModels.overlayManager.events}
       ariaLabel="Overlay manager"
     >
-      <p className="text-sm text-muted">Active overlays: {overlay.activeOverlays.length || 'None'}</p>
-      <p className="text-xs text-muted">Z-stack: {overlay.zStack.length ? overlay.zStack.join(', ') : 'Empty'}</p>
+      <p className="text-sm text-muted">
+        Active overlays: {overlay.activeOverlays.length || 'None'}
+      </p>
+      <p className="text-xs text-muted">
+        Z-stack: {overlay.zStack.length ? overlay.zStack.join(', ') : 'Empty'}
+      </p>
       <p className="text-xs text-muted">Last event: {overlay.lastEventId}</p>
     </Card>
   );
@@ -460,7 +543,12 @@ function MainPane() {
 
   return (
     <section className="space-y-4" aria-label="Main pane">
-      <Card title="MainPane" subtitle="AppShell" events={uiModels.mainPane.events} ariaLabel="Main pane summary">
+      <Card
+        title="MainPane"
+        subtitle="AppShell"
+        events={uiModels.mainPane.events}
+        ariaLabel="Main pane summary"
+      >
         <div className="flex items-center justify-between text-sm text-muted">
           <span>Active thread: {mainPane.activeThreadId}</span>
           <span>View mode: {mainPane.viewMode}</span>
@@ -484,12 +572,16 @@ function AppShell() {
         <p className="text-xs uppercase tracking-wide text-muted">AppShell</p>
         <h1 className="text-2xl font-semibold">AI Platform – Mocked Client</h1>
         <p className="text-sm text-muted">
-          Layout: {shell.layoutMode} • Active pane: {shell.activePane} • Last event: {shell.lastEventId}
+          Layout: {shell.layoutMode} • Active pane: {shell.activePane} • Last event:{' '}
+          {shell.lastEventId}
         </p>
       </div>
       <div className="flex flex-wrap justify-end gap-2 text-[11px] text-muted">
         {uiModels.appShell.events.map((event) => (
-          <span key={event} className="rounded-full border border-border px-3 py-1 uppercase tracking-wide">
+          <span
+            key={event}
+            className="rounded-full border border-border px-3 py-1 uppercase tracking-wide"
+          >
             {event}
           </span>
         ))}

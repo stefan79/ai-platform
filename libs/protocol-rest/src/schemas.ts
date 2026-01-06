@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ContextState } from '@ai-platform/context-core';
+import { coreEnvelopeSchema } from '@ai-platform/protocol-core';
 
 export const versionResponseSchema = z.object({
   version: z.string(),
@@ -31,4 +32,14 @@ export function parseVersionResponse(payload: unknown): VersionResponse {
 
 export function parseHealthResponse(payload: unknown): HealthResponse {
   return healthResponseSchema.parse(payload);
+}
+
+export const restEnvelopeSchema = coreEnvelopeSchema.extend({
+  requestId: z.string(),
+});
+
+export type RestEnvelope = z.infer<typeof restEnvelopeSchema>;
+
+export function parseRestEnvelope(payload: unknown): RestEnvelope {
+  return restEnvelopeSchema.parse(payload);
 }

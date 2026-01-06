@@ -28,6 +28,30 @@ pnpx nx run server-rest:serve --output-style=stream
 pnpx nx run server-ws:serve --output-style=stream
 ```
 
+Start local infrastructure dependencies (Redpanda + DynamoDB Local):
+
+```sh
+pnpx nx run infra:up --output-style=stream
+```
+
+Set up infrastructure (creates Kafka topics for the WS server):
+
+```sh
+bash scripts/setup-infrastructure.sh
+```
+
+Send a test user message over WebSocket:
+
+```sh
+pnpm exec tsx scripts/send-ws-user-message.ts
+```
+
+Stop local infrastructure:
+
+```sh
+pnpx nx run infra:down --output-style=stream
+```
+
 ## Test
 
 Run all tests across the workspace:

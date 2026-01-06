@@ -49,6 +49,8 @@
     "context-core": "libs/context-core",
     "protocol-rest": "libs/protocol-rest",
     "protocol-ws": "libs/protocol-ws",
-    "design-tokens": "libs/design-tokens"
+    "protocol-core": "libs/protocol-core",
+    "design-tokens": "libs/design-tokens",
+    "infra": "tools/infra"
   }
 }

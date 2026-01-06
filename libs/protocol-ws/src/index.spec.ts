@@ -1,20 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { protocolVersion, WsEnvelope } from './index';
+import { parseWsEnvelope, WsEnvelope } from './index';
 
-describe('protocol-ws placeholder', () => {
-  it('exposes the protocol version', () => {
-    expect(protocolVersion).toBe('0.1.0');
-  });
-
-  it('describes an envelope shape', () => {
-    const envelope: WsEnvelope<{ text: string }> = {
+describe('protocol-ws schemas', () => {
+  it('parses a websocket envelope', () => {
+    const envelope: WsEnvelope = {
       v: 1,
-      id: 'abc',
+      id: 'evt-1',
       ts: Date.now(),
-      type: 'client.hello',
-      payload: { text: 'hello' },
+      type: 'chat.message',
+      body: {
+        messageId: 'msg-1',
+        threadId: 'thread-1',
+        role: 'assistant',
+        content: 'Hello from WS',
+        createdAt: new Date().toISOString(),
+      },
     };
 
-    expect(envelope.payload.text).toBe('hello');
+    expect(parseWsEnvelope(envelope)).toEqual(envelope);
   });
 });

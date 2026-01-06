@@ -78,7 +78,7 @@ function ThreadList() {
   return (
     <Card title="ThreadList" subtitle="Sidebar" events={uiModels.threadList.events} ariaLabel="Thread list">
       <div className="flex items-center justify-between text-sm text-muted">
-        <span>Filter: "{list.filter || 'none'}"</span>
+        <span>Filter: &quot;{list.filter || 'none'}&quot;</span>
         <span>Selected: {list.selectedThreadId}</span>
       </div>
       <div className="space-y-2">
@@ -305,7 +305,7 @@ function Composer() {
           <span>Actors: {composer.selectedActors.join(', ')}</span>
         </div>
         <div className="mt-2 rounded-md border border-dashed border-border bg-surface/70 px-3 py-2 text-sm text-muted">
-          ComposerInput: "{input.draftText || 'Empty draft'}" ({input.isFocused ? 'Focused' : 'Blurred'})
+          ComposerInput: &quot;{input.draftText || 'Empty draft'}&quot; ({input.isFocused ? 'Focused' : 'Blurred'})
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {toolbar.availableCommands.map((command) => (
@@ -328,7 +328,7 @@ function Composer() {
         <div className="mt-2 flex items-center justify-between text-xs text-muted">
           <span>Open: {palette.isOpen ? 'Yes' : 'No'}</span>
           <span>
-            Query: "{palette.query || 'empty'}" • Highlighted: {palette.highlightedIndex + 1}/{palette.results.length}
+            Query: &quot;{palette.query || 'empty'}&quot; • Highlighted: {palette.highlightedIndex + 1}/{palette.results.length}
           </span>
         </div>
         <div className="mt-2 flex flex-wrap gap-2">

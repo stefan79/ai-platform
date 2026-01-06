@@ -1,0 +1,49 @@
+{
+  "name": "server-core",
+  "root": "apps/server-core",
+  "sourceRoot": "apps/server-core/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/server-core"],
+      "options": {
+        "command": "pnpm exec tsc -p apps/server-core/tsconfig.app.json"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_ENV=development pnpm exec tsx watch --tsconfig apps/server-core/tsconfig.app.json apps/server-core/src/main.ts",
+        "env": {
+          "KAFKA_BROKERS": "localhost:9092",
+          "KAFKA_CLIENT_ID": "ai-platform-server-core",
+          "KAFKA_GROUP_ID": "ai-platform-server-core",
+          "KAFKA_TOPIC": "ai-platform-messages",
+          "AWS_REGION": "us-east-1",
+          "DYNAMODB_DOMAIN_TABLE": "ai-platform-domain-events",
+          "DYNAMODB_OUTBOX_TABLE": "ai-platform-outbox"
+        }
+      }
+    },
+    "serve:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node dist/apps/server-core/main.js"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"apps/server-core/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec jest --config apps/server-core/jest.config.ts"
+      }
+    }
+  }
+}

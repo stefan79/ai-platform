@@ -21,9 +21,21 @@ export const userMessageBodySchema = z.object({
 
 export type UserMessageBody = z.infer<typeof userMessageBodySchema>;
 
-export const coreMessageTypeSchema = z.enum(['chat.message', 'user.message']);
+export const assistantMessageBodySchema = z.object({
+  assistantId: z.string().uuid(),
+  timestamp: z.number().int().nonnegative(),
+  body: z.string(),
+});
 
-export const coreMessageBodySchema = z.union([chatMessageBodySchema, userMessageBodySchema]);
+export type AssistantMessageBody = z.infer<typeof assistantMessageBodySchema>;
+
+export const coreMessageTypeSchema = z.enum(['chat.message', 'user.message', 'assistant.message']);
+
+export const coreMessageBodySchema = z.union([
+  chatMessageBodySchema,
+  userMessageBodySchema,
+  assistantMessageBodySchema,
+]);
 export type CoreMessageBody = z.infer<typeof coreMessageBodySchema>;
 
 export const coreEnvelopeSchema = z.object({
@@ -41,6 +53,10 @@ export function parseChatMessageBody(payload: unknown): ChatMessageBody {
 
 export function parseUserMessageBody(payload: unknown): UserMessageBody {
   return userMessageBodySchema.parse(payload);
+}
+
+export function parseAssistantMessageBody(payload: unknown): AssistantMessageBody {
+  return assistantMessageBodySchema.parse(payload);
 }
 
 export function parseCoreEnvelope(payload: unknown): CoreEnvelope {

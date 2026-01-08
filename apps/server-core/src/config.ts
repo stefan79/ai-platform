@@ -5,6 +5,8 @@ export const kafkaConfig = {
     .filter((broker) => broker.length > 0),
   clientId: process.env.KAFKA_CLIENT_ID ?? 'ai-platform-server-core',
   topic: process.env.KAFKA_TOPIC ?? 'ai-platform-messages',
+  outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
+  deadLetterTopic: process.env.KAFKA_DEAD_LETTER_TOPIC ?? 'ai-platform-dead-letter',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-core',
 };
 

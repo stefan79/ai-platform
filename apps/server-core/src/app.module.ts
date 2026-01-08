@@ -11,6 +11,7 @@ import { UserReducer } from './reducers/user.reducer';
 import { ThreadReducer } from './reducers/thread.reducer';
 import { DynamoPersistenceService } from './persistence/dynamo.persistence';
 import { OutboxService } from './outbox.service';
+import { ServerContext } from './server-context';
 
 @Module({
   imports: [
@@ -35,7 +36,12 @@ import { OutboxService } from './outbox.service';
     ]),
   ],
   controllers: [KafkaController],
+
+  //TODO: The three reducers (server, user, thread) should each have their own list of reducers to allow for better separation of concerns
+  //TODO: The reducers should get their handlers from the server context
+
   providers: [
+    ServerContext,
     KafkaProducerService,
     MessageProcessorService,
     ReducerChainService,

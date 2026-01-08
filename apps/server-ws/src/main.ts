@@ -11,12 +11,10 @@ export async function startServer() {
   const port = Number(process.env.WS_PORT ?? process.env.PORT ?? 3001);
   const host = process.env.WS_HOST ?? process.env.HOST ?? '0.0.0.0';
 
-  try {
-    await server.listen(port, host);
-    return server;
-  } catch (error) {
-    throw error;
-  }
+  await server.listen(port, host);
+  // eslint-disable-next-line no-console
+  console.log(`server-ws listening at http://${host}:${port}`);
+  return server;
 }
 
 if (require.main === module) {

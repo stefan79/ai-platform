@@ -5,5 +5,7 @@ export const kafkaConfig = {
     .filter((broker) => broker.length > 0),
   clientId: process.env.KAFKA_CLIENT_ID ?? 'ai-platform-server-ws',
   topic: process.env.KAFKA_TOPIC ?? 'ai-platform-messages',
+  outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-ws',
+  outboxGroupId: process.env.KAFKA_OUTBOX_GROUP_ID ?? 'ai-platform-server-ws-outbox',
 };

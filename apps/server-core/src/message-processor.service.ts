@@ -20,8 +20,13 @@ export class MessageProcessorService {
         try: () => parseKafkaEnvelope(raw),
         catch: (error) => new Error(`Invalid kafka envelope: ${(error as Error).message}`),
       }),
-      Effect.map((envelope) => envelope.body as CoreMessageBody),
-      Effect.flatMap((body) => this.reducerChain.reduce(body)),
+      Effect.flatMap((envelope) => {
+        const body = envelope.body as CoreMessageBody;
+        return this.reducerChain.reduce(body, {
+          sessionId: envelope.sessionId,
+          userId: envelope.userId,
+        });
+      }),
       Effect.tap((result) =>
         Effect.forEach(result.domainEvents, (record) =>
           Effect.sync(() => this.eventBus.publish(new MessageReducedEvent(record))),

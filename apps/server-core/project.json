@@ -14,13 +14,18 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "NODE_ENV=development pnpm exec tsx watch --tsconfig apps/server-core/tsconfig.app.json apps/server-core/src/main.ts",
+        "command": "NODE_ENV=development TS_NODE_PROJECT=apps/server-core/tsconfig.app.json pnpm exec ts-node-dev --respawn -r tsconfig-paths/register apps/server-core/src/main.ts",
         "env": {
           "KAFKA_BROKERS": "localhost:9092",
           "KAFKA_CLIENT_ID": "ai-platform-server-core",
-          "KAFKA_GROUP_ID": "ai-platform-server-core",
+          "KAFKA_GROUP_ID": "ai-platform-server-core-v2",
           "KAFKA_TOPIC": "ai-platform-messages",
+          "KAFKA_OUTBOX_TOPIC": "ai-platform-outbox",
+          "KAFKA_DEAD_LETTER_TOPIC": "ai-platform-dead-letter",
+          "AWS_ACCESS_KEY_ID": "local",
+          "AWS_SECRET_ACCESS_KEY": "local",
           "AWS_REGION": "us-east-1",
+          "DYNAMODB_ENDPOINT": "http://localhost:8000",
           "DYNAMODB_DOMAIN_TABLE": "ai-platform-domain-events",
           "DYNAMODB_OUTBOX_TABLE": "ai-platform-outbox"
         }

@@ -1,27 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { match, P } from 'ts-pattern';
 import type { CoreMessageBody } from '@ai-platform/protocol-core';
-import { createDomainEventRecord } from '../domain/events';
 import type { ReductionResult } from './reducer-chain.service';
-import type { Reducer } from './reducer.types';
+import type { ReduceContext, Reducer } from './reducer.types';
+import { isMatching } from 'ts-pattern';
+import { ServerContext } from '../server-context';
 
 @Injectable()
 export class ServerReducer implements Reducer {
-  async reduce(message: CoreMessageBody): Promise<ReductionResult | null> {
-    return match(message)
-      .with(
-        {
-          role: 'system',
-          messageId: P.string,
-          threadId: P.string,
-        },
-        (chatMessage) => ({
-          domainEvents: [
-            createDomainEventRecord(chatMessage.threadId, 'server', chatMessage),
-          ],
-          outboxRecords: [],
-        }),
-      )
-      .otherwise(() => null);
+  constructor(private readonly context: ServerContext) {}
+
+  async reduce(message: CoreMessageBody, context: ReduceContext): Promise<ReductionResult | null> {
+    for (const entry of this.context.serverReducers) {
+      const matches = isMatching(entry.pattern);
+      if (matches(message)) {
+        return entry.reduce(message, context);
+      }
+    }
+
+    return null;
   }
 }

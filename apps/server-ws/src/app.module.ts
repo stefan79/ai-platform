@@ -4,6 +4,7 @@ import { kafkaConfig } from './config';
 import { KafkaProducerService } from './kafka.service';
 import { createEnvelopePartitioner } from './partitioner';
 import { WsGateway } from './ws.gateway';
+import { KafkaConsumerService } from './kafka-consumer.service';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { WsGateway } from './ws.gateway';
       },
     ]),
   ],
-  providers: [KafkaProducerService, WsGateway],
+  providers: [KafkaProducerService, KafkaConsumerService, WsGateway],
 })
 export class AppModule {}

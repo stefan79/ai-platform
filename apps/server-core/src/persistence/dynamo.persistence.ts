@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DeleteCommand,
@@ -11,6 +11,7 @@ import type { DomainEventRecord } from '../domain/events';
 
 @Injectable()
 export class DynamoPersistenceService {
+  private readonly logger = new Logger(DynamoPersistenceService.name);
   private readonly client = DynamoDBDocumentClient.from(
     new DynamoDBClient({
       region: dynamoConfig.region,
@@ -26,6 +27,9 @@ export class DynamoPersistenceService {
       return;
     }
 
+    this.logger.log(
+      `Transacting ${domainEvents.length} domain events into ${dynamoConfig.domainTable} and ${outboxRecords.length} outbox records into ${dynamoConfig.outboxTable}`,
+    );
     const TransactItems = [
       ...domainEvents.map((event) => ({
         Put: {
@@ -46,9 +50,11 @@ export class DynamoPersistenceService {
         TransactItems,
       }),
     );
+    this.logger.log('DynamoDB transaction complete');
   }
 
   async deleteOutboxRecord(record: OutboxRecord): Promise<void> {
+    this.logger.log(`Deleting outbox record ${record.id} from ${dynamoConfig.outboxTable}`);
     await this.client.send(
       new DeleteCommand({
         TableName: dynamoConfig.outboxTable,
@@ -57,5 +63,6 @@ export class DynamoPersistenceService {
         },
       }),
     );
+    this.logger.log(`Deleted outbox record ${record.id}`);
   }
 }

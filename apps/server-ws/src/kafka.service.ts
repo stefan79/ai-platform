@@ -15,7 +15,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     await this.client.close();
   }
 
-  publish(message: KafkaEnvelope) {
-    return this.client.emit(message.topic, message);
+  publish(message: KafkaEnvelope, key?: string) {
+    return this.client.emit(message.topic, key ? { key, value: message } : message);
   }
 }

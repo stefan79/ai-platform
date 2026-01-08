@@ -1,46 +1,24 @@
-import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
-import { match, P } from 'ts-pattern';
-import type { CoreMessageBody, KafkaEnvelope } from '@ai-platform/protocol-core';
-import { createDomainEventRecord } from '../domain/events';
-import { createOutboxRecord } from '../domain/outbox';
-import { kafkaConfig } from '../config';
+import { isMatching } from 'ts-pattern';
+import type { CoreMessageBody } from '@ai-platform/protocol-core';
 import type { ReductionResult } from './reducer-chain.service';
-import type { Reducer } from './reducer.types';
+import type { ReduceContext, Reducer } from './reducer.types';
+import { ServerContext } from '../server-context';
 
 @Injectable()
 export class ThreadReducer implements Reducer {
-  async reduce(message: CoreMessageBody): Promise<ReductionResult | null> {
-    return match(message)
-      .with(
-        {
-          messageId: P.string,
-          threadId: P.string,
-          content: P.string,
-        },
-        (chatMessage) => {
-          const domainEvent = createDomainEventRecord(chatMessage.threadId, 'thread', chatMessage);
-          const echoEnvelope: KafkaEnvelope = {
-            id: randomUUID(),
-            ts: Date.now(),
-            type: 'assistant.message',
-            body: {
-              assistantId: randomUUID(),
-              timestamp: Date.now(),
-              body: `echo:${chatMessage.content}`,
-            },
-            messageType: 'assistant.message',
-            topic: kafkaConfig.topic,
-            partition: 0,
-            offset: 0,
-          };
+  constructor(private readonly context: ServerContext) {}
 
-          return {
-            domainEvents: [domainEvent],
-            outboxRecords: [createOutboxRecord('kafka.echo', echoEnvelope)],
-          };
-        },
-      )
-      .otherwise(() => null);
+  async reduce(message: CoreMessageBody, context: ReduceContext): Promise<ReductionResult | null> {
+    for (const entry of this.context.threadReducers) {
+      const matches = isMatching(entry.pattern) as (
+        value: CoreMessageBody,
+      ) => value is Parameters<typeof entry.reduce>[0];
+      if (matches(message)) {
+        return entry.reduce(message, context);
+      }
+    }
+
+    return null;
   }
 }

@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
-import { WsException } from '@nestjs/websockets';
 import { WsGateway } from './ws.gateway';
 import { KafkaProducerService } from './kafka.service';
+import type { Socket } from 'socket.io';
 
 describe('WsGateway', () => {
   const kafka = {
@@ -32,21 +32,30 @@ describe('WsGateway', () => {
       type: 'user.message',
       direction: 'client',
       body: {
-        userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
         timestamp: now,
         body: 'Hello from client',
       },
     };
 
-    const result = await gateway.handleMessage(payload);
+    const socket = {
+      data: {
+        sessionId: 'session-1',
+        userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
+      },
+      emit: jest.fn(),
+    } as unknown as Socket;
+
+    const result = await gateway.handleMessage(payload, socket);
 
     expect(kafka.publish).toHaveBeenCalledWith({
       ...payload,
+      sessionId: 'session-1',
+      userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
       messageType: payload.type,
       topic: 'ai-platform-messages',
       partition: 0,
       offset: 0,
-    });
+    }, 'session-1');
     expect(result).toEqual({ status: 'ok' });
   });
 
@@ -67,7 +76,21 @@ describe('WsGateway', () => {
       ts: 1735689600000,
     };
 
-    await expect(gateway.handleMessage(payload)).rejects.toBeInstanceOf(WsException);
+    const socket = {
+      data: {
+        sessionId: 'session-1',
+        userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
+      },
+      emit: jest.fn(),
+    } as unknown as Socket;
+
+    await expect(gateway.handleMessage(payload, socket)).resolves.toEqual(
+      expect.objectContaining({ status: 'error' }),
+    );
     expect(kafka.publish).not.toHaveBeenCalled();
+    expect(socket.emit).toHaveBeenCalledWith(
+      'message.error',
+      expect.objectContaining({ status: 'error' }),
+    );
   });
 });

@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import { kafkaConfig } from './config';
 
 async function bootstrap() {
+  console.log('Starting server-core microservice...');
+  console.log('Using Kafka Config:', kafkaConfig);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.KAFKA,
     options: {

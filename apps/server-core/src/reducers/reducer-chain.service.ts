@@ -3,7 +3,7 @@ import { Effect } from 'effect';
 import type { CoreMessageBody } from '@ai-platform/protocol-core';
 import type { OutboxRecord } from '../domain/outbox';
 import type { DomainEventRecord } from '../domain/events';
-import type { Reducer } from './reducer.types';
+import type { Reducer, ReduceContext } from './reducer.types';
 import { ServerReducer } from './server.reducer';
 import { UserReducer } from './user.reducer';
 import { ThreadReducer } from './thread.reducer';
@@ -26,17 +26,19 @@ export class ReducerChainService {
     this.reducers = [server, user, thread];
   }
 
-  reduce(message: CoreMessageBody) {
+  reduce(message: CoreMessageBody, context: ReduceContext) {
     return Effect.tryPromise({
       try: async () => {
         let result = emptyReduction;
 
         for (const reducer of this.reducers) {
-          const reduction = await reducer.reduce(message);
+          const reduction = await reducer.reduce(message, context);
 
           if (!reduction) {
             continue;
           }
+
+          console.log('Reducer', reducer.constructor.name, 'produced', reduction);
 
           result = {
             domainEvents: [...result.domainEvents, ...reduction.domainEvents],

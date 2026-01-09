@@ -50,3 +50,10 @@ clear separation between control panels (left) and conversation flow (right).
 - The timeline shows at least two messages with role-based styling.
 - The composer is anchored to the bottom of the main pane.
 - System status is visible at all times.
+
+## Component Mapping (shadcn/ui)
+
+- App shell and panels: `Card`, `CardHeader`, `CardContent`.
+- Status chips and events: `Badge`.
+- Thread actions: `Button` (outline).
+- Thread overview sections: Radix `Tabs`.

@@ -32,6 +32,19 @@ consistent across mocked and future event-driven iterations.
 - Prefer shadcn/ui and Radix primitives for consistent accessibility and focus states.
 - Message styling reflects actor role only (system/user/assistant).
 
+## Token Conventions
+
+- Use shadcn/ui token names in Tailwind (`bg-background`, `text-foreground`, `bg-card`, `border-border`).
+- Map design tokens in `libs/design-tokens/src/styles.css` to shadcn variables (background, card, primary, muted).
+- Prefer `text-muted-foreground` for secondary labels and metadata.
+
+## Component Mapping
+
+- Use shadcn/ui `Card` for panels (sidebar blocks, system state bar, timeline, composer).
+- Use `Badge` for status chips and event tags.
+- Use `Button` for thread actions and tool buttons (non-functional placeholders).
+- Use Radix `Tabs` for drawer section navigation.
+
 ## Interaction Constraints
 
 - Keep UI static; no real data loading or network activity.

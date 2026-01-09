@@ -26,6 +26,10 @@ Build a dynamic chat platform with:
 - `apps/server-ws/plugins-workspace`: git-managed plugin sources.
 - `apps/server-ws/plugins-dist`: built plugin artifacts served to clients.
 
+
+## Frontend guidance
+
+- For frontend/UI activities, follow `apps/client/AGENTS.md` for patterns and documentation templates.
 ## Repo conventions
 
 - Use Nx commands via `pnpx nx`.
@@ -41,6 +45,11 @@ Build a dynamic chat platform with:
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 - To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugins disabled for stability).
 - When working on frontend components, follow `docs/frontend/UX.MD` for UX rules.
+## Runtime bootstrap
+
+- Bootstrap client state via REST (initial snapshot) before connecting to WebSocket event stream.
+- After snapshot load, subscribe to WS and apply events in order; treat REST as a one-time seed and WS as the source of truth.
+- If WS reconnects, re-bootstrap (or request missed events) to avoid divergence.
 
 ## Detailed specs
 
@@ -64,6 +73,9 @@ Add a local `AGENTS.md` to extend/override guidance within a module:
 - Runtime: <bun/node/browser>
 - Frameworks: <list>
 - Testing: <list>
+
+## Bootstrap
+<REST snapshot + WS events notes>
 
 ## Patterns
 - Conventions: <list>

@@ -4,7 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { kafkaConfig } from './config';
 import { KafkaProducerService } from './kafka.producer';
 import { KafkaController } from './kafka.controller';
-import { MessageProcessorService } from './message-processor.service';
+import { CommandProcessorService } from './command-processor.service';
 import { ReducerChainService } from './reducers/reducer-chain.service';
 import { ServerReducer } from './reducers/server.reducer';
 import { UserReducer } from './reducers/user.reducer';
@@ -12,6 +12,9 @@ import { ThreadReducer } from './reducers/thread.reducer';
 import { DynamoPersistenceService } from './persistence/dynamo.persistence';
 import { OutboxService } from './outbox.service';
 import { ServerContext } from './server-context';
+import { UserMessageStrategy } from './strategies/user-message.strategy';
+import { KafkaCommandConsumerService } from './kafka-command-consumer.service';
+import { AssistantResponseService } from './assistant-response.service';
 
 @Module({
   imports: [
@@ -37,19 +40,19 @@ import { ServerContext } from './server-context';
   ],
   controllers: [KafkaController],
 
-  //TODO: The three reducers (server, user, thread) should each have their own list of reducers to allow for better separation of concerns
-  //TODO: The reducers should get their handlers from the server context
-
-  providers: [
+    providers: [
     ServerContext,
     KafkaProducerService,
-    MessageProcessorService,
+    KafkaCommandConsumerService,
+    AssistantResponseService,
+    CommandProcessorService,
     ReducerChainService,
     ServerReducer,
     UserReducer,
     ThreadReducer,
     DynamoPersistenceService,
     OutboxService,
+    UserMessageStrategy,
   ],
 })
 export class AppModule {}

@@ -1,17 +1,18 @@
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices';
 import type { KafkaMessage } from '@nestjs/microservices/external/kafka.interface';
-import { MessageProcessorService } from './message-processor.service';
+import { parseKafkaEnvelope } from '@ai-platform/protocol-core';
 import { kafkaConfig } from './config';
 import { KafkaProducerService } from './kafka.producer';
+import { UserMessageStrategy } from './strategies/user-message.strategy';
 
 @Controller()
 export class KafkaController {
   private readonly logger = new Logger(KafkaController.name);
 
   constructor(
-    private readonly processor: MessageProcessorService,
     private readonly producer: KafkaProducerService,
+    private readonly strategy: UserMessageStrategy,
   ) {}
 
   @EventPattern(kafkaConfig.topic)
@@ -30,10 +31,11 @@ export class KafkaController {
             ? JSON.parse(raw.toString('utf8'))
             : raw;
 
-      await this.processor.process(value);
+      const envelope = parseKafkaEnvelope(value);
+      await this.strategy.handle(envelope);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('Failed to process kafka message', error as Error);
+      this.logger.error('Failed to handle kafka message', error as Error);
       await this.producer.publishDeadLetter(_payload, reason);
       return;
     }

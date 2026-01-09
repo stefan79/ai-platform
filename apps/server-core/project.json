@@ -19,6 +19,8 @@
           "KAFKA_BROKERS": "localhost:9092",
           "KAFKA_CLIENT_ID": "ai-platform-server-core",
           "KAFKA_GROUP_ID": "ai-platform-server-core-v2",
+          "KAFKA_COMMANDS_TOPIC": "ai-platform-commands",
+          "KAFKA_COMMANDS_GROUP_ID": "ai-platform-server-core-commands",
           "KAFKA_TOPIC": "ai-platform-messages",
           "KAFKA_OUTBOX_TOPIC": "ai-platform-outbox",
           "KAFKA_DEAD_LETTER_TOPIC": "ai-platform-dead-letter",

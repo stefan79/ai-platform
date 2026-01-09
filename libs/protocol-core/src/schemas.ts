@@ -85,3 +85,44 @@ export type KafkaEnvelope = z.infer<typeof kafkaEnvelopeSchema>;
 export function parseKafkaEnvelope(payload: unknown): KafkaEnvelope {
   return kafkaEnvelopeSchema.parse(payload);
 }
+
+export const commandTypeSchema = z.enum([
+  'command.save-user-message',
+  'command.generate-assistant-response',
+]);
+
+export const saveUserMessageCommandSchema = z.object({
+  type: z.literal('command.save-user-message'),
+  payload: userMessageBodySchema,
+});
+
+export const generateAssistantResponseCommandSchema = z.object({
+  type: z.literal('command.generate-assistant-response'),
+  payload: z.object({
+    prompt: z.string(),
+  }),
+});
+
+const commandEnvelopeBaseSchema = z
+  .object({
+    id: z.string(),
+    ts: z.number(),
+    sessionId: z.string(),
+    userId: z.string().uuid(),
+  })
+  .strict();
+
+export const commandEnvelopeSchema = z.discriminatedUnion('type', [
+  commandEnvelopeBaseSchema
+    .extend(saveUserMessageCommandSchema.shape)
+    .strict(),
+  commandEnvelopeBaseSchema
+    .extend(generateAssistantResponseCommandSchema.shape)
+    .strict(),
+]);
+
+export type CommandEnvelope = z.infer<typeof commandEnvelopeSchema>;
+
+export function parseCommandEnvelope(payload: unknown): CommandEnvelope {
+  return commandEnvelopeSchema.parse(payload);
+}

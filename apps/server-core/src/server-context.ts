@@ -23,23 +23,31 @@ const userMessagePattern: P.Pattern<UserMessagePattern> = {
   body: P.string,
 };
 
+type AssistantMessagePattern = {
+  assistantId: string;
+  timestamp: number;
+  body: string;
+};
+
+const assistantMessagePattern: P.Pattern<AssistantMessagePattern> = {
+  assistantId: P.string,
+  timestamp: P.number,
+  body: P.string,
+};
+
 @Injectable()
 export class ServerContext {
   readonly userReducers: ReducerPattern[] = [];
   readonly serverReducers: ReducerPattern[] = [];
-  readonly threadReducers: ReducerPattern<UserMessagePattern>[] = [
+  readonly threadReducers: ReducerPattern[] = [
     {
-      pattern: userMessagePattern,
-      reduce: (userMessage, context) => {
-        const echoEnvelope: KafkaEnvelope = {
+      pattern: assistantMessagePattern,
+      reduce: (assistantMessage, context) => {
+        const outgoingEnvelope: KafkaEnvelope = {
           id: randomUUID(),
           ts: Date.now(),
           type: 'assistant.message',
-          body: {
-            assistantId: randomUUID(),
-            timestamp: Date.now(),
-            body: `echo:${userMessage.body}`,
-          },
+          body: assistantMessage,
           sessionId: context.sessionId,
           userId: context.userId ?? context.sessionId,
           messageType: 'assistant.message',
@@ -50,11 +58,20 @@ export class ServerContext {
 
         return {
           domainEvents: [
-            createDomainEventRecord(context.userId ?? context.sessionId, 'user', userMessage),
+            createDomainEventRecord(context.userId ?? context.sessionId, 'user', assistantMessage),
           ],
-          outboxRecords: [createOutboxRecord('kafka.echo', echoEnvelope)],
+          outboxRecords: [createOutboxRecord('kafka.echo', outgoingEnvelope)],
         };
       },
+    },
+    {
+      pattern: userMessagePattern,
+      reduce: (userMessage, context) => ({
+        domainEvents: [
+          createDomainEventRecord(context.userId ?? context.sessionId, 'user', userMessage),
+        ],
+        outboxRecords: [],
+      }),
     },
   ];
 }

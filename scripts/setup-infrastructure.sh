@@ -9,6 +9,7 @@ DYNAMODB_CONTAINER="${DYNAMODB_CONTAINER:-ai-platform-dynamodb}"
 
 KAFKA_BROKERS="${KAFKA_BROKERS:-localhost:9092}"
 KAFKA_TOPIC="${KAFKA_TOPIC:-ai-platform-messages}"
+KAFKA_COMMANDS_TOPIC="${KAFKA_COMMANDS_TOPIC:-ai-platform-commands}"
 KAFKA_OUTBOX_TOPIC="${KAFKA_OUTBOX_TOPIC:-ai-platform-outbox}"
 KAFKA_DEAD_LETTER_TOPIC="${KAFKA_DEAD_LETTER_TOPIC:-ai-platform-dead-letter}"
 KAFKA_PARTITIONS="${KAFKA_PARTITIONS:-1}"
@@ -106,6 +107,14 @@ if ! run_with_timeout 5 docker exec "$REDPANDA_CONTAINER" rpk topic describe "$K
     --replicas "$KAFKA_REPLICATION"
 fi
 
+if ! run_with_timeout 5 docker exec "$REDPANDA_CONTAINER" rpk topic describe "$KAFKA_COMMANDS_TOPIC" \
+  --brokers "$KAFKA_BROKERS" >/dev/null 2>&1; then
+  run_with_timeout 5 docker exec "$REDPANDA_CONTAINER" rpk topic create "$KAFKA_COMMANDS_TOPIC" \
+    --brokers "$KAFKA_BROKERS" \
+    --partitions "$KAFKA_PARTITIONS" \
+    --replicas "$KAFKA_REPLICATION"
+fi
+
 if ! run_with_timeout 5 docker exec "$REDPANDA_CONTAINER" rpk topic describe "$KAFKA_DEAD_LETTER_TOPIC" \
   --brokers "$KAFKA_BROKERS" >/dev/null 2>&1; then
   run_with_timeout 5 docker exec "$REDPANDA_CONTAINER" rpk topic create "$KAFKA_DEAD_LETTER_TOPIC" \
@@ -176,5 +185,5 @@ if ! aws dynamodb describe-table \
     --billing-mode PAY_PER_REQUEST >/dev/null
 fi
 
-echo "Redpanda ready. Topics '$KAFKA_TOPIC', '$KAFKA_OUTBOX_TOPIC', '$KAFKA_DEAD_LETTER_TOPIC' are available on $KAFKA_BROKERS."
+echo "Redpanda ready. Topics '$KAFKA_TOPIC', '$KAFKA_COMMANDS_TOPIC', '$KAFKA_OUTBOX_TOPIC', '$KAFKA_DEAD_LETTER_TOPIC' are available on $KAFKA_BROKERS."
 echo "DynamoDB ready. Tables '$DYNAMODB_DOMAIN_TABLE' and '$DYNAMODB_OUTBOX_TABLE' are available at $DYNAMODB_ENDPOINT."

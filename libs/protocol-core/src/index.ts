@@ -10,12 +10,18 @@ export {
   parseChatMessageBody,
   parseAssistantMessageBody,
   parseCoreEnvelope,
+  parseCommandEnvelope,
   parseKafkaEnvelope,
+  commandEnvelopeSchema,
+  commandTypeSchema,
+  generateAssistantResponseCommandSchema,
+  saveUserMessageCommandSchema,
   userMessageBodySchema,
 } from './schemas';
 export type {
   AssistantMessageBody,
   ChatMessageBody,
+  CommandEnvelope,
   CoreEnvelope,
   CoreMessageBody,
   KafkaEnvelope,

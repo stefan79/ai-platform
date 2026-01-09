@@ -19,10 +19,7 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
 
   register(context: ServerContext): void {
     this.context = context;
-    context.commandSchemaRegistry.register(
-      'command.save-user-message',
-      this.userMessageBodySchema,
-    );
+    context.commandSchemaRegistry.register('command.save-user-message', this.userMessageBodySchema);
     context.registerThreadCommandReducer({
       pattern: { type: 'command.save-user-message' },
       reduce: (envelope, reduceContext) => this.reduce(envelope, reduceContext),
@@ -33,17 +30,12 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
     if (!this.context) {
       throw new Error('ServerContext not registered for save user message handler');
     }
-    const command = this.context
-      .commandSchemaRegistry
-      .parse<z.infer<typeof this.userMessageBodySchema>>(
-        envelope,
-        'command.save-user-message',
-      );
+    const command = this.context.commandSchemaRegistry.parse<
+      z.infer<typeof this.userMessageBodySchema>
+    >(envelope, 'command.save-user-message');
     const payload = command.payload;
     return {
-      domainEvents: [
-        createDomainEventRecord(context.userId ?? context.sessionId, 'user', payload),
-      ],
+      domainEvents: [createDomainEventRecord(context.userId ?? context.sessionId, 'user', payload)],
       outboxRecords: [],
     };
   }

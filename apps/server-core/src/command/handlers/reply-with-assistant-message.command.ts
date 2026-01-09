@@ -11,9 +11,7 @@ import type { ReductionResult } from '../../domain/reducers/reducer-chain.servic
 import type { ServerContext } from '../../domain/server-context';
 
 @Injectable()
-export class ReplyWithAssistantMessageCommandHandler
-  implements CommandHandler
-{
+export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
   private context?: ServerContext;
   private readonly assistantMessageSchema = z
     .object({
@@ -39,9 +37,10 @@ export class ReplyWithAssistantMessageCommandHandler
     if (!this.context) {
       throw new Error('ServerContext not registered for reply command handler');
     }
-    const command = this.context
-      .commandSchemaRegistry
-      .parse<{ prompt: string }>(envelope, 'command.generate-assistant-response');
+    const command = this.context.commandSchemaRegistry.parse<{ prompt: string }>(
+      envelope,
+      'command.generate-assistant-response',
+    );
     const responseText = await this.context.assistantResponse.generate(command.payload.prompt);
     const message: z.infer<typeof this.assistantMessageSchema> = {
       assistantId: randomUUID(),
@@ -63,9 +62,7 @@ export class ReplyWithAssistantMessageCommandHandler
     };
 
     return {
-      domainEvents: [
-        createDomainEventRecord(context.userId ?? context.sessionId, 'user', message),
-      ],
+      domainEvents: [createDomainEventRecord(context.userId ?? context.sessionId, 'user', message)],
       outboxRecords: [createOutboxRecord('kafka.echo', outgoingEnvelope)],
     };
   }

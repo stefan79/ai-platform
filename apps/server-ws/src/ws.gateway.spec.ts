@@ -47,18 +47,21 @@ describe('WsGateway', () => {
 
     const result = await gateway.handleMessage(payload, socket);
 
-    expect(kafka.publish).toHaveBeenCalledWith({
-      id: payload.id,
-      ts: payload.ts,
-      type: payload.type,
-      body: payload.body,
-      sessionId: 'session-1',
-      userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
-      messageType: payload.type,
-      topic: 'ai-platform-events',
-      partition: 0,
-      offset: 0,
-    }, 'session-1');
+    expect(kafka.publish).toHaveBeenCalledWith(
+      {
+        id: payload.id,
+        ts: payload.ts,
+        type: payload.type,
+        body: payload.body,
+        sessionId: 'session-1',
+        userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
+        messageType: payload.type,
+        topic: 'ai-platform-events',
+        partition: 0,
+        offset: 0,
+      },
+      'session-1',
+    );
     expect(result).toEqual({ status: 'ok' });
   });
 

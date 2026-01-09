@@ -4,10 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 
 export async function startServer() {
-  const server = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  const server = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
   const port = Number(process.env.WS_PORT ?? process.env.PORT ?? 3001);
   const host = process.env.WS_HOST ?? process.env.HOST ?? '0.0.0.0';
 

@@ -52,9 +52,9 @@ describe('KafkaConsumerService', () => {
     });
     expect(runMock).toHaveBeenCalledTimes(1);
 
-    const eachMessage = runMock.mock.calls[0][0].eachMessage as (
-      args: { message: { value: Buffer | string | null } },
-    ) => Promise<void>;
+    const eachMessage = runMock.mock.calls[0][0].eachMessage as (args: {
+      message: { value: Buffer | string | null };
+    }) => Promise<void>;
 
     const envelope = {
       id: 'evt-1',
@@ -93,9 +93,9 @@ describe('KafkaConsumerService', () => {
 
     await service.onModuleInit();
 
-    const eachMessage = runMock.mock.calls[0][0].eachMessage as (
-      args: { message: { value: Buffer | string | null } },
-    ) => Promise<void>;
+    const eachMessage = runMock.mock.calls[0][0].eachMessage as (args: {
+      message: { value: Buffer | string | null };
+    }) => Promise<void>;
 
     const envelope = {
       id: 'evt-2',
@@ -119,9 +119,7 @@ describe('KafkaConsumerService', () => {
       message: { value: JSON.stringify(envelope) },
     });
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'No active socket for sessionId session-missing',
-    );
+    expect(warnSpy).toHaveBeenCalledWith('No active socket for sessionId session-missing');
     warnSpy.mockRestore();
   });
 
@@ -131,9 +129,9 @@ describe('KafkaConsumerService', () => {
 
     await service.onModuleInit();
 
-    const eachMessage = runMock.mock.calls[0][0].eachMessage as (
-      args: { message: { value: Buffer | string | null } },
-    ) => Promise<void>;
+    const eachMessage = runMock.mock.calls[0][0].eachMessage as (args: {
+      message: { value: Buffer | string | null };
+    }) => Promise<void>;
 
     await eachMessage({ message: { value: Buffer.from('{bad') } });
 

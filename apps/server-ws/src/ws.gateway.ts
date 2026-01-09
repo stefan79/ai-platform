@@ -23,9 +23,7 @@ import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
 export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly sessions = new Map<string, Socket>();
 
-  constructor(
-    @Inject(KafkaProducerService) private readonly kafka: KafkaProducerService,
-  ) {}
+  constructor(@Inject(KafkaProducerService) private readonly kafka: KafkaProducerService) {}
 
   handleConnection(socket: Socket) {
     const sessionId = randomUUID();
@@ -57,7 +55,6 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: unknown, @ConnectedSocket() socket: Socket) {
-
     console.log('Received WS message:', payload);
 
     try {

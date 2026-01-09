@@ -10,7 +10,10 @@ export interface OutboxRecord {
   readonly createdAt: number;
 }
 
-export const createOutboxRecord = (type: OutboxEffectType, payload: EventKafkaEnvelope): OutboxRecord => ({
+export const createOutboxRecord = (
+  type: OutboxEffectType,
+  payload: EventKafkaEnvelope,
+): OutboxRecord => ({
   id: randomUUID(),
   type,
   payload,

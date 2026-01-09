@@ -9,7 +9,10 @@ import { ServerContextRepository } from '../server-context.repository';
 export class ServerReducer implements Reducer {
   constructor(private readonly contextRepository: ServerContextRepository) {}
 
-  async reduce(message: CommandKafkaEnvelope, context: ReduceContext): Promise<ReductionResult | null> {
+  async reduce(
+    message: CommandKafkaEnvelope,
+    context: ReduceContext,
+  ): Promise<ReductionResult | null> {
     const serverContext = this.contextRepository.load();
     for (const entry of serverContext.serverCommandReducers) {
       const matches = isMatching(entry.pattern);

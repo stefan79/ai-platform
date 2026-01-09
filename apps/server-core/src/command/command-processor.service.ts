@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { Effect, pipe } from 'effect';
-import {
-  parseCommandKafkaEnvelope,
-  type CommandKafkaEnvelope,
-} from '@ai-platform/protocol-core';
+import { parseCommandKafkaEnvelope, type CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import { ReducerChainService } from '../domain/reducers/reducer-chain.service';
 import { OutboxService } from './outbox.service';
 import { MessageReducedEvent } from '../domain/events';

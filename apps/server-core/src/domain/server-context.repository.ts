@@ -47,10 +47,7 @@ export class ServerContextRepository {
       handler.register(context);
     }
 
-    const commandHandlers = [
-      this.saveUserMessageCommand,
-      this.replyWithAssistantMessageCommand,
-    ];
+    const commandHandlers = [this.saveUserMessageCommand, this.replyWithAssistantMessageCommand];
     for (const handler of commandHandlers) {
       handler.register(context);
     }

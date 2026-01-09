@@ -1,10 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DeleteCommand,
-  DynamoDBDocumentClient,
-  TransactWriteCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DeleteCommand, DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamoConfig } from '../config';
 import type { OutboxRecord } from '../domain/outbox';
 import type { DomainEventRecord } from '../domain/events';

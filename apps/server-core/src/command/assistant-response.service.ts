@@ -5,14 +5,13 @@ export class AssistantResponseService {
   private readonly logger = new Logger(AssistantResponseService.name);
 
   async generate(prompt: string): Promise<string> {
-
     console.log('Generating assistant response for prompt:', prompt);
 
     const apiKey = process.env.OPENAI_API_KEY;
     const model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
     if (!apiKey) {
-      console.log("Returning echo response due to missing OpenAI API key");
+      console.log('Returning echo response due to missing OpenAI API key');
       return `echo:${prompt}`;
     }
 
@@ -38,8 +37,7 @@ export class AssistantResponseService {
       output?: { content?: { text?: string }[] }[];
     };
 
-    const outputText =
-      data.output_text ?? data.output?.[0]?.content?.[0]?.text ?? '';
+    const outputText = data.output_text ?? data.output?.[0]?.content?.[0]?.text ?? '';
 
     if (!outputText) {
       this.logger.warn('OpenAI response missing output text; using echo fallback');

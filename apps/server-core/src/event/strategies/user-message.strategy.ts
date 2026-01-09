@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { CommandKafkaEnvelope, CommandEnvelope, EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import type {
+  CommandKafkaEnvelope,
+  CommandEnvelope,
+  EventKafkaEnvelope,
+} from '@ai-platform/protocol-core';
 import { z } from 'zod';
 import { kafkaConfig } from '../../config';
 import type { EventHandler } from './event-handler';

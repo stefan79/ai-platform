@@ -12,10 +12,7 @@ import type { ReduceContext } from '../domain/reducers/reducer.types';
 describe('MessageProcessorService', () => {
   it('passes session context to reducers and dispatches outbox', async () => {
     const reducerChain = {
-      reduce: jest.fn<
-        EffectType.Effect<ReductionResult>,
-        [CommandKafkaEnvelope, ReduceContext]
-      >(),
+      reduce: jest.fn<EffectType.Effect<ReductionResult>, [CommandKafkaEnvelope, ReduceContext]>(),
     };
     const outbox = {
       persistAndDispatch: jest.fn<EffectType.Effect<void>, [ReductionResult]>(),
@@ -86,10 +83,7 @@ describe('MessageProcessorService', () => {
 
   it('throws on invalid kafka envelope', async () => {
     const reducerChain = {
-      reduce: jest.fn<
-        EffectType.Effect<ReductionResult>,
-        [CommandKafkaEnvelope, ReduceContext]
-      >(),
+      reduce: jest.fn<EffectType.Effect<ReductionResult>, [CommandKafkaEnvelope, ReduceContext]>(),
     };
     const outbox = {
       persistAndDispatch: jest.fn<EffectType.Effect<void>, [ReductionResult]>(),

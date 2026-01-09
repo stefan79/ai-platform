@@ -1,6 +1,5 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { kafkaConfig } from './config';
 import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
 
 @Injectable()

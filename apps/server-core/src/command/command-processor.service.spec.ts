@@ -1,17 +1,27 @@
+import type { Effect as EffectType } from 'effect';
 import { Effect } from 'effect';
+import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import { CommandProcessorService } from './command-processor.service';
 import { MessageReducedEvent } from '../domain/events';
+import type { ReducerChainService } from '../domain/reducers/reducer-chain.service';
+import type { OutboxService } from './outbox.service';
+import type { EventBus } from '@nestjs/cqrs';
+import type { ReductionResult } from '../domain/reducers/reducer-chain.service';
+import type { ReduceContext } from '../domain/reducers/reducer.types';
 
 describe('MessageProcessorService', () => {
   it('passes session context to reducers and dispatches outbox', async () => {
     const reducerChain = {
-      reduce: jest.fn(),
+      reduce: jest.fn<
+        EffectType.Effect<ReductionResult>,
+        [CommandKafkaEnvelope, ReduceContext]
+      >(),
     };
     const outbox = {
-      persistAndDispatch: jest.fn(),
+      persistAndDispatch: jest.fn<EffectType.Effect<void>, [ReductionResult]>(),
     };
     const eventBus = {
-      publish: jest.fn(),
+      publish: jest.fn<void, [MessageReducedEvent]>(),
     };
 
     const reduction = {
@@ -32,9 +42,9 @@ describe('MessageProcessorService', () => {
     outbox.persistAndDispatch.mockReturnValue(Effect.succeed(undefined));
 
     const service = new CommandProcessorService(
-      reducerChain as any,
-      outbox as any,
-      eventBus as any,
+      reducerChain as unknown as ReducerChainService,
+      outbox as unknown as OutboxService,
+      eventBus as unknown as EventBus,
     );
 
     await service.process({
@@ -76,19 +86,22 @@ describe('MessageProcessorService', () => {
 
   it('throws on invalid kafka envelope', async () => {
     const reducerChain = {
-      reduce: jest.fn(),
+      reduce: jest.fn<
+        EffectType.Effect<ReductionResult>,
+        [CommandKafkaEnvelope, ReduceContext]
+      >(),
     };
     const outbox = {
-      persistAndDispatch: jest.fn(),
+      persistAndDispatch: jest.fn<EffectType.Effect<void>, [ReductionResult]>(),
     };
     const eventBus = {
-      publish: jest.fn(),
+      publish: jest.fn<void, [MessageReducedEvent]>(),
     };
 
     const service = new CommandProcessorService(
-      reducerChain as any,
-      outbox as any,
-      eventBus as any,
+      reducerChain as unknown as ReducerChainService,
+      outbox as unknown as OutboxService,
+      eventBus as unknown as EventBus,
     );
 
     await expect(service.process({})).rejects.toThrow('Invalid command envelope');

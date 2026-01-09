@@ -14,7 +14,8 @@
     "build": "pnpm nx build",
     "serve": "pnpm nx run-many -t serve --parallel --nx-bail",
     "format": "pnpm nx format",
-    "format:check": "pnpm nx format:check"
+    "format:check": "pnpm nx format:check",
+    "ci:local": "NX_ISOLATE_PLUGINS=false NX_DAEMON=false NX_ADD_PLUGINS=false NX_CACHE_PROJECT_GRAPH=false pnpm nx run-many --target=lint --all --output-style=stream && pnpm nx run-many --target=test --all --output-style=stream && pnpm nx run-many --target=build --all --output-style=stream && pnpm nx format:check --all --output-style=stream"
   },
   "private": true,
   "dependencies": {
@@ -49,6 +50,7 @@
     "@nx/react": "22.3.3",
     "@nx/vite": "22.3.3",
     "@nx/web": "22.3.3",
+    "@nestjs/testing": "^10.4.4",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",

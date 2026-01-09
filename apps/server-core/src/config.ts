@@ -4,7 +4,7 @@ export const kafkaConfig = {
     .map((broker) => broker.trim())
     .filter((broker) => broker.length > 0),
   clientId: process.env.KAFKA_CLIENT_ID ?? 'ai-platform-server-core',
-  topic: process.env.KAFKA_TOPIC ?? 'ai-platform-messages',
+  eventsTopic: process.env.KAFKA_EVENTS_TOPIC ?? 'ai-platform-events',
   commandsTopic: process.env.KAFKA_COMMANDS_TOPIC ?? 'ai-platform-commands',
   outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
   deadLetterTopic: process.env.KAFKA_DEAD_LETTER_TOPIC ?? 'ai-platform-dead-letter',

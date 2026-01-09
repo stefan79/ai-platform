@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { isMatching } from 'ts-pattern';
-import type { CoreMessageBody } from '@ai-platform/protocol-core';
+import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import type { ReductionResult } from './reducer-chain.service';
 import type { ReduceContext, Reducer } from './reducer.types';
-import { ServerContext } from '../server-context';
+import { ServerContextRepository } from '../server-context.repository';
 
 @Injectable()
 export class ThreadReducer implements Reducer {
-  constructor(private readonly context: ServerContext) {}
+  constructor(private readonly contextRepository: ServerContextRepository) {}
 
-  async reduce(message: CoreMessageBody, context: ReduceContext): Promise<ReductionResult | null> {
-    for (const entry of this.context.threadReducers) {
+  async reduce(message: CommandKafkaEnvelope, context: ReduceContext): Promise<ReductionResult | null> {
+    const serverContext = this.contextRepository.load();
+    for (const entry of serverContext.threadCommandReducers) {
       const matches = isMatching(entry.pattern) as (
-        value: CoreMessageBody,
+        value: CommandKafkaEnvelope,
       ) => value is Parameters<typeof entry.reduce>[0];
       if (matches(message)) {
         return entry.reduce(message, context);

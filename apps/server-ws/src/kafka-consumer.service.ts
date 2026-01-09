@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Kafka } from 'kafkajs';
-import { parseKafkaEnvelope } from '@ai-platform/protocol-core';
+import { parseEventKafkaEnvelope } from '@ai-platform/protocol-core';
 import type { WsEnvelope } from '@ai-platform/protocol-ws';
 import { kafkaConfig } from './config';
 import { WsGateway } from './ws.gateway';
@@ -35,7 +35,7 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
                 ? JSON.parse(raw.toString('utf8'))
                 : raw;
 
-          const envelope = parseKafkaEnvelope(parsed);
+          const envelope = parseEventKafkaEnvelope(parsed);
           const wsEnvelope: WsEnvelope = {
             v: 1,
             id: envelope.id,

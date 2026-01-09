@@ -19,7 +19,7 @@
           "KAFKA_BROKERS": "localhost:9092",
           "KAFKA_CLIENT_ID": "ai-platform-server-ws",
           "KAFKA_GROUP_ID": "ai-platform-server-ws",
-          "KAFKA_TOPIC": "ai-platform-messages",
+          "KAFKA_EVENTS_TOPIC": "ai-platform-events",
           "KAFKA_OUTBOX_TOPIC": "ai-platform-outbox",
           "KAFKA_OUTBOX_GROUP_ID": "ai-platform-server-ws-outbox"
         }
@@ -34,7 +34,7 @@
           "KAFKA_BROKERS": "localhost:9092",
           "KAFKA_CLIENT_ID": "ai-platform-server-ws",
           "KAFKA_GROUP_ID": "ai-platform-server-ws",
-          "KAFKA_TOPIC": "ai-platform-messages"
+          "KAFKA_EVENTS_TOPIC": "ai-platform-events"
         }
       }
     },

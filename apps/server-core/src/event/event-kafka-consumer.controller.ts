@@ -1,21 +1,21 @@
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices';
 import type { KafkaMessage } from '@nestjs/microservices/external/kafka.interface';
-import { parseKafkaEnvelope } from '@ai-platform/protocol-core';
-import { kafkaConfig } from './config';
-import { KafkaProducerService } from './kafka.producer';
-import { UserMessageStrategy } from './strategies/user-message.strategy';
+import { parseEventKafkaEnvelope } from '@ai-platform/protocol-core';
+import { kafkaConfig } from '../config';
+import { EventKafkaProducer } from './event-kafka.producer';
+import { ServerContextRepository } from '../domain/server-context.repository';
 
 @Controller()
-export class KafkaController {
-  private readonly logger = new Logger(KafkaController.name);
+export class EventKafkaConsumer {
+  private readonly logger = new Logger(EventKafkaConsumer.name);
 
   constructor(
-    private readonly producer: KafkaProducerService,
-    private readonly strategy: UserMessageStrategy,
+    private readonly producer: EventKafkaProducer,
+    private readonly contextRepository: ServerContextRepository,
   ) {}
 
-  @EventPattern(kafkaConfig.topic)
+  @EventPattern(kafkaConfig.eventsTopic)
   async handleMessage(@Payload() _payload: KafkaMessage, @Ctx() context: KafkaContext) {
     try {
       const message = context.getMessage();
@@ -31,8 +31,20 @@ export class KafkaController {
             ? JSON.parse(raw.toString('utf8'))
             : raw;
 
-      const envelope = parseKafkaEnvelope(value);
-      await this.strategy.handle(envelope);
+      const envelope = parseEventKafkaEnvelope(value);
+      const serverContext = this.contextRepository.load();
+      let matched = false;
+      for (const handler of serverContext.eventHandlers) {
+        if (!handler.match(envelope)) {
+          continue;
+        }
+        await handler.handle(envelope);
+        matched = true;
+      }
+
+      if (!matched) {
+        this.logger.debug(`No strategy for message type ${envelope.type}`);
+      }
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Failed to handle kafka message', error as Error);

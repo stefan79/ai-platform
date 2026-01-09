@@ -1,13 +1,23 @@
 import { Logger } from '@nestjs/common';
 import type { KafkaContext } from '@nestjs/microservices';
-import { KafkaController } from './kafka.controller';
+import { EventKafkaConsumer } from './event-kafka-consumer.controller';
 
-describe('KafkaController', () => {
+describe('EventKafkaConsumer', () => {
   const producer = {
     publishDeadLetter: jest.fn().mockResolvedValue(undefined),
   };
   const strategy = {
     handle: jest.fn().mockResolvedValue(undefined),
+  };
+  const contextRepository = {
+    load: () => ({
+      eventHandlers: [
+        {
+          match: () => true,
+          handle: strategy.handle,
+        },
+      ],
+    }),
   };
 
   beforeEach(() => {
@@ -17,12 +27,12 @@ describe('KafkaController', () => {
 
   it('skips messages with empty values', async () => {
     const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
-    const controller = new KafkaController(producer as any, strategy as any);
-    const context = {
+    const controller = new EventKafkaConsumer(producer as any, contextRepository as any);
+    const kafkaContext = {
       getMessage: () => ({ value: null }),
     } as unknown as KafkaContext;
 
-    await controller.handleMessage({} as any, context);
+    await controller.handleMessage({} as any, kafkaContext);
 
     expect(strategy.handle).not.toHaveBeenCalled();
     expect(producer.publishDeadLetter).not.toHaveBeenCalled();
@@ -32,13 +42,13 @@ describe('KafkaController', () => {
 
   it('routes failures to the dead-letter topic', async () => {
     const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
-    const controller = new KafkaController(producer as any, strategy as any);
-    const context = {
+    const controller = new EventKafkaConsumer(producer as any, contextRepository as any);
+    const kafkaContext = {
       getMessage: () => ({ value: Buffer.from('{bad') }),
     } as unknown as KafkaContext;
 
     const payload = { value: 'raw' };
-    await controller.handleMessage(payload as any, context);
+    await controller.handleMessage(payload as any, kafkaContext);
 
     expect(producer.publishDeadLetter).toHaveBeenCalledWith(
       payload,
@@ -48,8 +58,8 @@ describe('KafkaController', () => {
   });
 
   it('processes valid messages', async () => {
-    const controller = new KafkaController(producer as any, strategy as any);
-    const context = {
+    const controller = new EventKafkaConsumer(producer as any, contextRepository as any);
+    const kafkaContext = {
       getMessage: () => ({
         value: JSON.stringify({
           id: 'evt-1',
@@ -59,14 +69,14 @@ describe('KafkaController', () => {
           sessionId: 'session-1',
           userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
           messageType: 'user.message',
-          topic: 'ai-platform-messages',
+          topic: 'ai-platform-events',
           partition: 0,
           offset: 0,
         }),
       }),
     } as unknown as KafkaContext;
 
-    await controller.handleMessage({} as any, context);
+    await controller.handleMessage({} as any, kafkaContext);
 
     expect(strategy.handle).toHaveBeenCalled();
     expect(producer.publishDeadLetter).not.toHaveBeenCalled();

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { match } from 'ts-pattern';
 import { Effect } from 'effect';
-import { DynamoPersistenceService } from './persistence/dynamo.persistence';
-import { KafkaProducerService } from './kafka.producer';
-import type { ReductionResult } from './reducers/reducer-chain.service';
-import type { OutboxRecord } from './domain/outbox';
+import { DynamoPersistenceService } from '../persistence/dynamo.persistence';
+import { EventKafkaProducer } from '../event/event-kafka.producer';
+import type { ReductionResult } from '../domain/reducers/reducer-chain.service';
+import type { OutboxRecord } from '../domain/outbox';
 
 @Injectable()
 export class OutboxService {
@@ -12,7 +12,7 @@ export class OutboxService {
 
   constructor(
     private readonly persistence: DynamoPersistenceService,
-    private readonly producer: KafkaProducerService,
+    private readonly producer: EventKafkaProducer,
   ) {}
 
   persistAndDispatch(result: ReductionResult) {

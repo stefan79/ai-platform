@@ -18,7 +18,7 @@ async function bootstrap() {
         groupId: kafkaConfig.groupId,
       },
       subscribe: {
-        topics: [kafkaConfig.topic],
+        topics: [kafkaConfig.eventsTopic],
         fromBeginning: false,
       },
     },

@@ -13,7 +13,7 @@ import { parseWsEnvelope } from '@ai-platform/protocol-ws';
 import { kafkaConfig } from './config';
 import { KafkaProducerService } from './kafka.service';
 import type { WsEnvelope } from '@ai-platform/protocol-ws';
-import type { KafkaEnvelope } from '@ai-platform/protocol-core';
+import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
 
 @WebSocketGateway({
   cors: {
@@ -76,7 +76,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const envelope: WsEnvelope = parseWsEnvelope(payload);
       console.log('Envelope parsed:', envelope);
 
-      const kafkaEnvelope: KafkaEnvelope = {
+      const kafkaEnvelope: EventKafkaEnvelope = {
         id: envelope.id,
         ts: envelope.ts,
         type: envelope.type,
@@ -84,7 +84,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         sessionId,
         userId,
         messageType: envelope.type,
-        topic: kafkaConfig.topic,
+        topic: kafkaConfig.eventsTopic,
         partition: 0,
         offset: 0,
       };

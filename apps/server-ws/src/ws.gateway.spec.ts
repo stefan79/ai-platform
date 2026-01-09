@@ -52,7 +52,7 @@ describe('WsGateway', () => {
       sessionId: 'session-1',
       userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
       messageType: payload.type,
-      topic: 'ai-platform-messages',
+      topic: 'ai-platform-events',
       partition: 0,
       offset: 0,
     }, 'session-1');

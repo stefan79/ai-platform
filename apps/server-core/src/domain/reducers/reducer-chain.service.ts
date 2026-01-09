@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Effect } from 'effect';
-import type { CoreMessageBody } from '@ai-platform/protocol-core';
-import type { OutboxRecord } from '../domain/outbox';
-import type { DomainEventRecord } from '../domain/events';
+import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
+import type { OutboxRecord } from '../outbox';
+import type { DomainEventRecord } from '../events';
 import type { Reducer, ReduceContext } from './reducer.types';
 import { ServerReducer } from './server.reducer';
 import { UserReducer } from './user.reducer';
@@ -26,7 +26,7 @@ export class ReducerChainService {
     this.reducers = [server, user, thread];
   }
 
-  reduce(message: CoreMessageBody, context: ReduceContext) {
+  reduce(message: CommandKafkaEnvelope, context: ReduceContext) {
     return Effect.tryPromise({
       try: async () => {
         let result = emptyReduction;

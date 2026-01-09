@@ -1,4 +1,4 @@
-import type { CoreMessageBody } from '@ai-platform/protocol-core';
+import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import type { ReductionResult } from './reducer-chain.service';
 
 export interface ReduceContext {
@@ -7,5 +7,5 @@ export interface ReduceContext {
 }
 
 export interface Reducer {
-  reduce(message: CoreMessageBody, context: ReduceContext): Promise<ReductionResult | null>;
+  reduce(message: CommandKafkaEnvelope, context: ReduceContext): Promise<ReductionResult | null>;
 }

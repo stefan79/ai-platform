@@ -1,10 +1,10 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { kafkaConfig } from './config';
-import type { KafkaEnvelope } from '@ai-platform/protocol-core';
+import { kafkaConfig } from '../config';
+import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
 
 @Injectable()
-export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
+export class EventKafkaProducer implements OnModuleInit, OnModuleDestroy {
   constructor(@Inject('KAFKA_CLIENT') private readonly client: ClientKafka) {}
 
   async onModuleInit() {
@@ -15,16 +15,12 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     await this.client.close();
   }
 
-  publishTo(topic: string, payload: unknown, key?: string) {
-    return this.client.emit(topic, key ? { key, value: payload } : payload);
-  }
-
-  publish(message: KafkaEnvelope, key?: string) {
-    return this.publishTo(message.topic, message, key);
+  publish(message: EventKafkaEnvelope, key?: string) {
+    return this.client.emit(message.topic, key ? { key, value: message } : message);
   }
 
   publishDeadLetter(payload: unknown, reason: string) {
-    return this.publishTo(kafkaConfig.deadLetterTopic, {
+    return this.client.emit(kafkaConfig.deadLetterTopic, {
       id: 'dlq-' + Date.now(),
       ts: Date.now(),
       reason,

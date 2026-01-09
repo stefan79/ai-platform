@@ -1,12 +1,12 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Kafka } from 'kafkajs';
-import { kafkaConfig } from './config';
+import { kafkaConfig } from '../config';
 import { CommandProcessorService } from './command-processor.service';
-import { KafkaProducerService } from './kafka.producer';
+import { CommandKafkaProducer } from './command-kafka.producer';
 
 @Injectable()
-export class KafkaCommandConsumerService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(KafkaCommandConsumerService.name);
+export class CommandKafkaConsumer implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(CommandKafkaConsumer.name);
   private readonly kafka = new Kafka({
     clientId: `${kafkaConfig.clientId}-commands`,
     brokers: kafkaConfig.brokers,
@@ -15,7 +15,7 @@ export class KafkaCommandConsumerService implements OnModuleInit, OnModuleDestro
 
   constructor(
     private readonly processor: CommandProcessorService,
-    private readonly producer: KafkaProducerService,
+    private readonly producer: CommandKafkaProducer,
   ) {}
 
   async onModuleInit() {

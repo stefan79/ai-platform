@@ -39,6 +39,7 @@ Build a dynamic chat platform with:
 - Use the NX MCP server as listed below for development tasks.
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 - To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugins disabled for stability).
+- When working on frontend components, follow `docs/frontend/UX.MD` for UX rules.
 
 ## Detailed specs
 

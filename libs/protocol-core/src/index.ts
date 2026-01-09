@@ -1,14 +1,20 @@
 export {
-  chatMessageBodySchema,
-  chatRoleSchema,
   coreMessageBodySchema,
   coreEnvelopeSchema,
   coreMessageTypeSchema,
-  kafkaEnvelopeSchema,
-  parseUserMessageBody,
-  parseChatMessageBody,
+  eventKafkaEnvelopeSchema,
+  commandKafkaEnvelopeSchema,
   parseCoreEnvelope,
-  parseKafkaEnvelope,
-  userMessageBodySchema,
+  parseCommandEnvelope,
+  parseEventKafkaEnvelope,
+  parseCommandKafkaEnvelope,
+  commandEnvelopeSchema,
+  commandTypeSchema,
 } from './schemas';
-export type { ChatMessageBody, CoreEnvelope, CoreMessageBody, KafkaEnvelope, UserMessageBody } from './schemas';
+export type {
+  CommandKafkaEnvelope,
+  CommandEnvelope,
+  CoreEnvelope,
+  CoreMessageBody,
+  EventKafkaEnvelope,
+} from './schemas';

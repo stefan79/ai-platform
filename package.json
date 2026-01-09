@@ -8,13 +8,14 @@
   },
   "scripts": {
     "nx": "nx",
-    "dev": "NX_DAEMON=false pnpm nx run-many -t serve -p server-rest,server-ws,client --parallel --nx-bail --output-style=stream",
+    "dev": "NX_DAEMON=false pnpm nx run-many -t serve -p server-rest,server-ws,server-core,client --parallel=4 --nx-bail --output-style=stream",
     "lint": "pnpm nx lint",
     "test": "pnpm nx test",
     "build": "pnpm nx build",
     "serve": "pnpm nx run-many -t serve --parallel --nx-bail",
     "format": "pnpm nx format",
-    "format:check": "pnpm nx format:check"
+    "format:check": "pnpm nx format:check",
+    "ci:local": "NX_ISOLATE_PLUGINS=false NX_DAEMON=false NX_ADD_PLUGINS=false NX_CACHE_PROJECT_GRAPH=false pnpm nx run-many --target=lint --all --output-style=stream && pnpm nx run-many --target=test --all --output-style=stream && pnpm nx run-many --target=build --all --output-style=stream && pnpm nx format:check --all --output-style=stream"
   },
   "private": true,
   "dependencies": {
@@ -23,7 +24,11 @@
     "@nestjs/microservices": "^10.4.4",
     "@nestjs/platform-fastify": "^10.4.4",
     "@nestjs/platform-socket.io": "^10.4.4",
+    "@nestjs/cqrs": "^10.0.0",
     "@nestjs/websockets": "^10.4.4",
+    "@aws-sdk/client-dynamodb": "^3.670.0",
+    "@aws-sdk/lib-dynamodb": "^3.670.0",
+    "effect": "^3.11.1",
     "fastify": "^4.28.1",
     "kafkajs": "^2.2.4",
     "pino": "^9.3.2",
@@ -34,6 +39,7 @@
     "socket.io-client": "^4.7.5",
     "socket.io": "^4.7.5",
     "tslib": "^2.8.1",
+    "ts-pattern": "^5.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -44,6 +50,7 @@
     "@nx/react": "22.3.3",
     "@nx/vite": "22.3.3",
     "@nx/web": "22.3.3",
+    "@nestjs/testing": "^10.4.4",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",
@@ -68,6 +75,8 @@
     "tailwindcss": "^3.4.14",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",

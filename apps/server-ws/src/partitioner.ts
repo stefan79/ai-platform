@@ -5,6 +5,9 @@ export const createEnvelopePartitioner = () => {
 
   return (args: Parameters<ReturnType<typeof Partitioners.DefaultPartitioner>>[0]) => {
     const { message, partitionMetadata } = args;
+    if (message.key != null) {
+      return fallback(args);
+    }
     const value = message.value;
     let envelopePartition: number | undefined;
 

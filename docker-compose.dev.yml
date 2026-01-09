@@ -4,35 +4,32 @@ services:
     container_name: ai-platform-redpanda
     command:
       [
-        "redpanda",
-        "start",
-        "--overprovisioned",
-        "--smp",
-        "1",
-        "--memory",
-        "1G",
-        "--reserve-memory",
-        "0M",
-        "--node-id",
-        "0",
-        "--check=false",
-        "--kafka-addr",
-        "PLAINTEXT://0.0.0.0:9092",
-        "--advertise-kafka-addr",
-        "PLAINTEXT://localhost:9092"
+        'redpanda',
+        'start',
+        '--overprovisioned',
+        '--smp',
+        '1',
+        '--memory',
+        '1G',
+        '--reserve-memory',
+        '0M',
+        '--node-id',
+        '0',
+        '--check=false',
+        '--kafka-addr',
+        'PLAINTEXT://0.0.0.0:9092',
+        '--advertise-kafka-addr',
+        'PLAINTEXT://localhost:9092',
       ]
     ports:
-      - "9092:9092"
-      - "9644:9644"
+      - '9092:9092'
+      - '9644:9644'
 
   dynamodb:
     image: amazon/dynamodb-local:2.5.2
     container_name: ai-platform-dynamodb
-    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "/home/dynamodblocal/data"]
+    command: ['-jar', 'DynamoDBLocal.jar', '-sharedDb', '-dbPath', '/home/dynamodblocal/data']
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
-      - dynamodb-data:/home/dynamodblocal/data
-
-volumes:
-  dynamodb-data:
+      - ./dynamodb-data:/home/dynamodblocal/data

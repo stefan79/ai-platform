@@ -8,6 +8,7 @@ describe('protocol-ws schemas', () => {
       id: 'evt-1',
       ts: Date.now(),
       type: 'chat.message',
+      direction: 'client',
       body: {
         messageId: 'msg-1',
         threadId: 'thread-1',

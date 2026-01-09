@@ -25,18 +25,16 @@ const socket = io(wsUrl, { transports: ['websocket'] });
 const timeoutMs = Number(process.env.WS_TIMEOUT_MS ?? 3000);
 
 socket.on('connect', () => {
-  socket
-    .timeout(timeoutMs)
-    .emit('message', message, (error: unknown, response: unknown) => {
-      if (error) {
-        // eslint-disable-next-line no-console
-        console.error('WS response timeout:', error);
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('WS response:', response);
-      }
-      socket.close();
-    });
+  socket.timeout(timeoutMs).emit('message', message, (error: unknown, response: unknown) => {
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('WS response timeout:', error);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('WS response:', response);
+    }
+    socket.close();
+  });
 });
 
 socket.on('connect_error', (error) => {

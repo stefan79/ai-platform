@@ -36,6 +36,7 @@ Build a dynamic chat platform with:
 - Add module-specific `AGENTS.md` files under `apps/<name>/` or `packages/<name>/`.
 - Use Context7 for templates and documentation lookups.
 - Use the GitHub MCP server for repo management tasks.
+- Use the Playwright MCP server for browser automation tasks.
 - Use the NX MCP server as listed below for development tasks.
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 - To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugins disabled for stability).
@@ -69,6 +70,22 @@ Add a local `AGENTS.md` to extend/override guidance within a module:
 - File layout: <list>
 - Commands: <pnpx nx ...>
 ```
+
+## MCP tool usage examples
+
+Use these as templates when the task matches:
+
+- GitHub MCP (repo management): list open PRs, add a comment, or create a branch.
+  - Example: `mcp__github__list_pull_requests` to review open PRs.
+  - Example: `mcp__github__add_issue_comment` to leave feedback on an issue/PR.
+  - Example: `mcp__github__create_branch` before pushing changes.
+- Context7 (docs/templates): resolve a library ID, then query docs for a specific task.
+  - Example: `mcp__context7__resolve-library-id` with `libraryName: "react"` and a focused query like "useEffect cleanup".
+  - Example: `mcp__context7__query-docs` with the resolved library ID to fetch code examples.
+- Playwright (browser automation): navigate, inspect, and interact with pages.
+  - Example: `mcp__playwright__browser_navigate` to open a URL.
+  - Example: `mcp__playwright__browser_snapshot` to capture an accessibility tree for analysis.
+  - Example: `mcp__playwright__browser_click` and `mcp__playwright__browser_fill_form` to exercise UI flows.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

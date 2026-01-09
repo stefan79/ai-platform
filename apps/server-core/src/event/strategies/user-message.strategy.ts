@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { CommandKafkaEnvelope, CommandEnvelope, EventKafkaEnvelope, UserMessageBody } from '@ai-platform/protocol-core';
+import type { CommandKafkaEnvelope, CommandEnvelope, EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import { z } from 'zod';
 import { kafkaConfig } from '../../config';
 import type { EventHandler } from './event-handler';
 import type { ServerContext } from '../../domain/server-context';
@@ -8,11 +9,18 @@ import type { ServerContext } from '../../domain/server-context';
 @Injectable()
 export class UserMessageStrategy implements EventHandler<EventKafkaEnvelope> {
   private readonly logger = new Logger(UserMessageStrategy.name);
+  private readonly userMessageBodySchema = z
+    .object({
+      timestamp: z.number().int().nonnegative(),
+      body: z.string(),
+    })
+    .strict();
 
   private context?: ServerContext;
 
   register(context: ServerContext): void {
     this.context = context;
+    context.eventSchemaRegistry.register('user.message', this.userMessageBodySchema);
     context.registerEventHandler(this);
   }
 
@@ -26,7 +34,7 @@ export class UserMessageStrategy implements EventHandler<EventKafkaEnvelope> {
       return;
     }
 
-    const userMessage = envelope.body as UserMessageBody;
+    const userMessage = this.userMessageBodySchema.parse(envelope.body);
     const saveCommand: CommandEnvelope = {
       id: randomUUID(),
       ts: Date.now(),

@@ -8,6 +8,8 @@ import { EventKafkaProducer } from '../event/event-kafka.producer';
 import { SaveUserMessageCommandHandler } from '../command/handlers/save-user-message.command';
 import { ReplyWithAssistantMessageCommandHandler } from '../command/handlers/reply-with-assistant-message.command';
 import { AssistantResponseService } from '../command/assistant-response.service';
+import { CommandSchemaRegistry } from './registries/command-schema.registry';
+import { EventSchemaRegistry } from './registries/event-schema.registry';
 
 @Injectable()
 export class ServerContextRepository {
@@ -26,11 +28,15 @@ export class ServerContextRepository {
 
   load(): ServerContext {
     const eventHandlers: EventHandler<EventKafkaEnvelope>[] = [];
+    const commandSchemaRegistry = new CommandSchemaRegistry();
+    const eventSchemaRegistry = new EventSchemaRegistry();
     const context = new ServerContext(
       eventHandlers,
       this.commandProducer,
       this.assistantResponse,
       this.eventProducer,
+      commandSchemaRegistry,
+      eventSchemaRegistry,
       [],
       [],
       [],

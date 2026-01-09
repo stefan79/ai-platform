@@ -33,12 +33,13 @@ export class EventKafkaConsumer {
 
       const envelope = parseEventKafkaEnvelope(value);
       const serverContext = this.contextRepository.load();
+      const validated = serverContext.eventSchemaRegistry.parse(envelope);
       let matched = false;
       for (const handler of serverContext.eventHandlers) {
-        if (!handler.match(envelope)) {
+        if (!handler.match(validated)) {
           continue;
         }
-        await handler.handle(envelope);
+        await handler.handle(validated);
         matched = true;
       }
 

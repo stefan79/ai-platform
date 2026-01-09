@@ -89,7 +89,12 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         offset: 0,
       };
 
-      const key = 'threadId' in envelope.body ? envelope.body.threadId : sessionId;
+      const body = envelope.body as Record<string, unknown> | null;
+      const threadId =
+        body && typeof body === 'object' && typeof body.threadId === 'string'
+          ? body.threadId
+          : undefined;
+      const key = threadId ?? sessionId;
       await this.kafka.publish(kafkaEnvelope, key);
       console.log('Published to Kafka:', kafkaEnvelope);
 

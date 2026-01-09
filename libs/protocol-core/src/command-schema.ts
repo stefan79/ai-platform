@@ -1,22 +1,5 @@
 import { z } from 'zod';
-import { userMessageBodySchema } from './event-schema';
-
-export const commandTypeSchema = z.enum([
-  'command.save-user-message',
-  'command.generate-assistant-response',
-]);
-
-export const saveUserMessageCommandSchema = z.object({
-  type: z.literal('command.save-user-message'),
-  payload: userMessageBodySchema,
-});
-
-export const generateAssistantResponseCommandSchema = z.object({
-  type: z.literal('command.generate-assistant-response'),
-  payload: z.object({
-    prompt: z.string(),
-  }),
-});
+export const commandTypeSchema = z.string();
 
 const commandEnvelopeBaseSchema = z
   .object({
@@ -27,14 +10,12 @@ const commandEnvelopeBaseSchema = z
   })
   .strict();
 
-export const commandEnvelopeSchema = z.discriminatedUnion('type', [
-  commandEnvelopeBaseSchema
-    .extend(saveUserMessageCommandSchema.shape)
-    .strict(),
-  commandEnvelopeBaseSchema
-    .extend(generateAssistantResponseCommandSchema.shape)
-    .strict(),
-]);
+export const commandEnvelopeSchema = commandEnvelopeBaseSchema
+  .extend({
+    type: z.string(),
+    payload: z.unknown(),
+  })
+  .strict();
 
 export type CommandEnvelope = z.infer<typeof commandEnvelopeSchema>;
 
@@ -42,7 +23,7 @@ export function parseCommandEnvelope(payload: unknown): CommandEnvelope {
   return commandEnvelopeSchema.parse(payload);
 }
 
-const commandKafkaEnvelopeBaseSchema = commandEnvelopeBaseSchema
+export const commandKafkaEnvelopeSchema = commandEnvelopeSchema
   .extend({
     commandType: commandTypeSchema,
     topic: z.string(),
@@ -51,19 +32,6 @@ const commandKafkaEnvelopeBaseSchema = commandEnvelopeBaseSchema
     headers: z.record(z.string()).optional(),
   })
   .strict();
-
-const commandKafkaSaveSchema = commandKafkaEnvelopeBaseSchema
-  .extend(saveUserMessageCommandSchema.shape)
-  .strict();
-
-const commandKafkaGenerateSchema = commandKafkaEnvelopeBaseSchema
-  .extend(generateAssistantResponseCommandSchema.shape)
-  .strict();
-
-export const commandKafkaEnvelopeSchema = z.discriminatedUnion('type', [
-  commandKafkaSaveSchema,
-  commandKafkaGenerateSchema,
-]);
 
 export type CommandKafkaEnvelope = z.infer<typeof commandKafkaEnvelopeSchema>;
 

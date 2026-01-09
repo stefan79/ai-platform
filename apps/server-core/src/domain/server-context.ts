@@ -6,6 +6,8 @@ import type { ReduceContext } from './reducers/reducer.types';
 import type { CommandKafkaProducer } from '../command/command-kafka.producer';
 import type { AssistantResponseService } from '../command/assistant-response.service';
 import type { EventKafkaProducer } from '../event/event-kafka.producer';
+import type { CommandSchemaRegistry } from './registries/command-schema.registry';
+import type { EventSchemaRegistry } from './registries/event-schema.registry';
 
 export type ReducerPattern<T = CommandKafkaEnvelope> = {
   pattern: P.Pattern<T>;
@@ -23,6 +25,8 @@ export class ServerContext {
     readonly commandProducer: CommandKafkaProducer,
     readonly assistantResponse: AssistantResponseService,
     readonly eventProducer: EventKafkaProducer,
+    readonly commandSchemaRegistry: CommandSchemaRegistry,
+    readonly eventSchemaRegistry: EventSchemaRegistry,
     userCommandReducers: ReducerPattern[],
     serverCommandReducers: ReducerPattern[],
     threadCommandReducers: ReducerPattern[],

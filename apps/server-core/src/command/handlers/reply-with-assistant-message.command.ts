@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { AssistantMessageBody, CommandKafkaEnvelope, EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import type { CommandKafkaEnvelope, EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import { z } from 'zod';
 import { kafkaConfig } from '../../config';
 import { createDomainEventRecord } from '../../domain/events';
 import { createOutboxRecord } from '../../domain/outbox';
@@ -14,9 +15,20 @@ export class ReplyWithAssistantMessageCommandHandler
   implements CommandHandler
 {
   private context?: ServerContext;
+  private readonly assistantMessageSchema = z
+    .object({
+      assistantId: z.string().uuid(),
+      timestamp: z.number().int().nonnegative(),
+      body: z.string(),
+    })
+    .strict();
 
   register(context: ServerContext): void {
     this.context = context;
+    context.commandSchemaRegistry.register(
+      'command.generate-assistant-response',
+      z.object({ prompt: z.string() }),
+    );
     context.registerThreadCommandReducer({
       pattern: { type: 'command.generate-assistant-response' },
       reduce: (envelope, reduceContext) => this.reduce(envelope, reduceContext),
@@ -24,16 +36,14 @@ export class ReplyWithAssistantMessageCommandHandler
   }
 
   async reduce(envelope: CommandKafkaEnvelope, context: ReduceContext): Promise<ReductionResult> {
-    const payload = envelope.payload as { prompt?: unknown };
-    if (typeof payload.prompt !== 'string') {
-      throw new Error('Missing prompt for assistant response');
-    }
     if (!this.context) {
       throw new Error('ServerContext not registered for reply command handler');
     }
-
-    const responseText = await this.context.assistantResponse.generate(payload.prompt);
-    const message: AssistantMessageBody = {
+    const command = this.context
+      .commandSchemaRegistry
+      .parse<{ prompt: string }>(envelope, 'command.generate-assistant-response');
+    const responseText = await this.context.assistantResponse.generate(command.payload.prompt);
+    const message: z.infer<typeof this.assistantMessageSchema> = {
       assistantId: randomUUID(),
       timestamp: Date.now(),
       body: responseText,

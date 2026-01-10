@@ -7,7 +7,6 @@ import type { Socket } from 'socket.io-client';
 import { logger } from '../logger';
 import type { AppStore } from './store';
 import type { AppState, BootstrapSnapshot, EventEnvelope } from './types';
-import type { AppShellState } from '../models';
 import { fetchJson } from '../api/client';
 import type { ThreadBus } from './thread-bus';
 

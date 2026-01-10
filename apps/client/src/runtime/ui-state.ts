@@ -16,14 +16,17 @@ const setAtPath = <State>(state: State, path: string, value: unknown): State => 
     return state;
   }
 
-  const rootClone = Array.isArray(state) ? ([...state] as unknown[]) : { ...(state as {}) };
+  const rootClone = Array.isArray(state)
+    ? ([...state] as unknown[])
+    : isRecord(state)
+      ? { ...state }
+      : {};
   let cursor: unknown = rootClone;
   let current: unknown = state;
 
   for (let index = 0; index < segments.length - 1; index += 1) {
     const segment = segments[index];
-    const key =
-      Array.isArray(current) && isArrayIndex(segment) ? Number(segment) : segment;
+    const key = Array.isArray(current) && isArrayIndex(segment) ? Number(segment) : segment;
 
     const nextCurrent =
       current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : {};

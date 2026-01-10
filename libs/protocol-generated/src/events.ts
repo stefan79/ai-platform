@@ -46,7 +46,7 @@ export type EventEnvelope<T extends EventType = EventType> = {
 export const parseEventPayload = <T extends EventType>(
   type: T,
   payload: unknown,
-): EventPayloadMap[T] => eventSchemas[type].parse(payload);
+): EventPayloadMap[T] => eventSchemas[type].parse(payload) as EventPayloadMap[T];
 
 export const eventEnvelopeSchema = z.object({
   id: z.string(),

@@ -50,10 +50,7 @@ export function MessageTimeline({ className }: { className?: string }) {
       ) : (
         <div className="space-y-3">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className="rounded-md border border-border bg-card p-4"
-            >
+            <div key={message.id} className="rounded-md border border-border bg-card p-4">
               <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
                 <span>
                   {message.role} • {new Date(message.timestamp).toISOString()}

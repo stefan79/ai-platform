@@ -84,10 +84,7 @@ export function MessageComposer() {
     <Panel
       title="MessageComposer"
       subtitle="Main Pane"
-      events={[
-        ...uiModels.messageComposer.events,
-        ...uiModels.composerInput.events,
-      ]}
+      events={[...uiModels.messageComposer.events, ...uiModels.composerInput.events]}
       ariaLabel="Message composer"
       mockId="mock.message-composer"
     >

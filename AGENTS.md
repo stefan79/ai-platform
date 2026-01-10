@@ -26,10 +26,10 @@ Build a dynamic chat platform with:
 - `apps/server-ws/plugins-workspace`: git-managed plugin sources.
 - `apps/server-ws/plugins-dist`: built plugin artifacts served to clients.
 
-
 ## Frontend guidance
 
 - For frontend/UI activities, follow `apps/client/AGENTS.md` for patterns and documentation templates.
+
 ## Repo conventions
 
 - Use Nx commands via `pnpx nx`.
@@ -44,8 +44,10 @@ Build a dynamic chat platform with:
 - Use the Playwright MCP server for browser automation tasks.
 - Use the NX MCP server as listed below for development tasks.
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
-- To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugins disabled for stability).
+- To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugin isolation disabled, `--parallel=1`, and lint for `protocol-generated`/`server-core` run separately due to Nx flakiness).
+- Before `format:check`, run `pnpm nx format:write --all --output-style=stream` to keep formatting clean.
 - When working on frontend components, follow `docs/frontend/UX.MD` for UX rules.
+
 ## Runtime bootstrap
 
 - Bootstrap client state via REST (initial snapshot) before connecting to WebSocket event stream.

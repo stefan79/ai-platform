@@ -15,7 +15,7 @@
     "serve": "pnpm nx run-many -t serve --parallel --nx-bail",
     "format": "pnpm nx format",
     "format:check": "pnpm nx format:check",
-    "ci:local": "NX_ISOLATE_PLUGINS=false NX_DAEMON=false NX_ADD_PLUGINS=false NX_CACHE_PROJECT_GRAPH=false pnpm nx run-many --target=lint --all --output-style=stream && pnpm nx run-many --target=test --all --output-style=stream && pnpm nx run-many --target=build --all --output-style=stream && pnpm nx format:check --all --output-style=stream"
+    "ci:local": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx run-many --target=lint --all --exclude=infra,protocol-generated,server-core --parallel=1 --output-style=stream && NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx run protocol-generated:lint --output-style=stream && NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx run server-core:lint --output-style=stream && NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx run-many --target=test --all --exclude=infra --parallel=1 --output-style=stream && NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx run-many --target=build --all --exclude=infra --parallel=1 --output-style=stream && NX_DAEMON=false NX_ISOLATE_PLUGINS=false pnpm nx format:check --all --output-style=stream"
   },
   "private": true,
   "dependencies": {

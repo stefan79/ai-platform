@@ -232,11 +232,7 @@ function ThreadHeader() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {actions.availableActions.map((action) => (
-            <Button
-              key={action}
-              variant="outline"
-              size="sm"
-            >
+            <Button key={action} variant="outline" size="sm">
               {action}
             </Button>
           ))}

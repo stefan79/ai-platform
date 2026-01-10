@@ -11,7 +11,7 @@ const useAppStore = (): AppStore => {
   return store;
 };
 
-export const useAppSelector = <Selected,>(selector: (state: AppState) => Selected): Selected => {
+export const useAppSelector = <Selected>(selector: (state: AppState) => Selected): Selected => {
   const store = useAppStore();
   return useSyncExternalStore(
     store.subscribe,

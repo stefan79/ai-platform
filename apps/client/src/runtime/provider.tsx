@@ -39,13 +39,7 @@ export function AppRuntimeProvider({ children, config }: AppRuntimeProviderProps
       wsBaseUrl: config?.wsBaseUrl ?? defaultRuntimeConfig.wsBaseUrl,
       userId: profile.userId ?? config?.userId ?? defaultRuntimeConfig.userId,
     }),
-    [
-      config?.restBaseUrl,
-      config?.snapshotPath,
-      config?.wsBaseUrl,
-      config?.userId,
-      profile.userId,
-    ],
+    [config?.restBaseUrl, config?.snapshotPath, config?.wsBaseUrl, config?.userId, profile.userId],
   );
 
   useEffect(() => {
@@ -65,12 +59,7 @@ export function AppRuntimeProvider({ children, config }: AppRuntimeProviderProps
       runtimeRef.current = null;
       unsubscribeThreadBus();
     };
-  }, [
-    resolvedConfig.restBaseUrl,
-    resolvedConfig.snapshotPath,
-    resolvedConfig.wsBaseUrl,
-    resolvedConfig.userId,
-  ]);
+  }, [resolvedConfig]);
 
   const runtimeControls = useMemo<RuntimeControls>(
     () => ({
@@ -82,9 +71,7 @@ export function AppRuntimeProvider({ children, config }: AppRuntimeProviderProps
   return (
     <AppStoreContext.Provider value={storeRef.current}>
       <ThreadBusProvider value={threadBusRef.current}>
-        <AppRuntimeContext.Provider value={runtimeControls}>
-          {children}
-        </AppRuntimeContext.Provider>
+        <AppRuntimeContext.Provider value={runtimeControls}>{children}</AppRuntimeContext.Provider>
       </ThreadBusProvider>
     </AppStoreContext.Provider>
   );

@@ -24,7 +24,8 @@ body {
 /* Layout fallback for when utility classes are unavailable. */
 .app-root {
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(124, 58, 237, 0.15), transparent 55%),
+  background:
+    radial-gradient(circle at top, rgba(124, 58, 237, 0.15), transparent 55%),
     linear-gradient(135deg, rgba(16, 20, 43, 0.95), rgba(11, 16, 33, 0.95));
 }
 

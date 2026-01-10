@@ -1,14 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 import { Badge } from './ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 export type PanelProps = {
   title: string;
@@ -66,9 +59,7 @@ export function Panel({
         )}
       </CardHeader>
       <CardContent className="space-y-3">{children}</CardContent>
-      {footer && (
-        <CardFooter className="text-sm text-muted-foreground">{footer}</CardFooter>
-      )}
+      {footer && <CardFooter className="text-sm text-muted-foreground">{footer}</CardFooter>}
     </Card>
   );
 }

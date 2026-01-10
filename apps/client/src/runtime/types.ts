@@ -104,7 +104,6 @@ export type ThreadEvent<T extends EventType = EventType> = {
   payload: EventPayloadMap[T];
 };
 
-
 export type UiStatePatchPayload =
   | {
       path: string;

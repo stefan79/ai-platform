@@ -9,10 +9,7 @@ type EventDefinition = {
 };
 
 const workspaceRoot = process.cwd();
-const strategiesDir = path.resolve(
-  workspaceRoot,
-  'apps/server-core/src/event/strategies',
-);
+const strategiesDir = path.resolve(workspaceRoot, 'apps/server-core/src/event/strategies');
 const outputDir = path.resolve(workspaceRoot, 'libs/protocol-generated/src');
 const outputFile = path.resolve(outputDir, 'events.ts');
 
@@ -167,7 +164,7 @@ lines.push('');
 lines.push('export const parseEventPayload = <T extends EventType>(');
 lines.push('  type: T,');
 lines.push('  payload: unknown,');
-lines.push('): EventPayloadMap[T] => eventSchemas[type].parse(payload);');
+lines.push('): EventPayloadMap[T] => eventSchemas[type].parse(payload) as EventPayloadMap[T];');
 lines.push('');
 lines.push('export const eventEnvelopeSchema = z.object({');
 lines.push('  id: z.string(),');

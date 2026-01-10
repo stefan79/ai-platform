@@ -13,9 +13,7 @@ const UserProfileContext = createContext<UserProfile>(defaultProfile);
 
 export function UserProfileProvider({ children }: { children: ReactNode }) {
   return (
-    <UserProfileContext.Provider value={defaultProfile}>
-      {children}
-    </UserProfileContext.Provider>
+    <UserProfileContext.Provider value={defaultProfile}>{children}</UserProfileContext.Provider>
   );
 }
 

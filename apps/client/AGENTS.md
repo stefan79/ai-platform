@@ -1,18 +1,22 @@
 # AGENTS.md — client
 
 ## Purpose
+
 Provide the React shell for the chat UI, including layout, static models, and component scaffolding.
 
 ## Ownership
+
 - Maintainers: <team>
 - Critical paths: AppShell, Sidebar, MainPane, Timeline, Composer
 
 ## Constraints
+
 - Runtime: browser
 - Frameworks: React, Vite, Tailwind
 - Testing: Vitest, Testing Library
 
 ## Documentation Request Template
+
 Use this block at the top of a component file to capture UI intent and integration details.
 
 ```
@@ -54,6 +58,7 @@ Use this block at the top of a component file to capture UI intent and integrati
 ```
 
 ## Commands
+
 - Dev: `pnpm nx run client:serve --output-style=stream`
 - Test: `pnpm nx run client:test --output-style=stream`
 - Build: `pnpm nx run client:build --output-style=stream`

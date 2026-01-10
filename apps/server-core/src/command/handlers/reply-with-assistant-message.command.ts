@@ -35,10 +35,7 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
       prompt: string;
       responseTo: string;
       threadId: string;
-    }>(
-      envelope,
-      'command.generate-assistant-response',
-    );
+    }>(envelope, 'command.generate-assistant-response');
     const responseText = await this.context.assistantResponse.generate(command.payload.prompt);
     const message: z.infer<typeof assistantMessageSchema> = {
       messageId: randomUUID(),

@@ -28,7 +28,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile --prod=false
       - name: Lint
         run: pnpm nx run-many --target=lint --all
       - name: Test

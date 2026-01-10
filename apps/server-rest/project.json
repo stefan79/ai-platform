@@ -1,0 +1,40 @@
+{
+  "name": "server-rest",
+  "root": "apps/server-rest",
+  "sourceRoot": "apps/server-rest/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/server-rest"],
+      "options": {
+        "command": "pnpm exec tsc -p apps/server-rest/tsconfig.app.json"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_ENV=development TS_NODE_PROJECT=apps/server-rest/tsconfig.app.json pnpm exec ts-node-dev --respawn -r tsconfig-paths/register apps/server-rest/src/main.ts"
+      }
+    },
+    "serve:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node dist/apps/server-rest/main.js"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"apps/server-rest/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec jest --config apps/server-rest/jest.config.ts"
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 # AGENTS.md — AI Platform Monorepo
 
 ## Goal
+
 Build a dynamic chat platform with:
+
 - Turn-based conversations over WebSocket and REST.
 - A minimal React shell with runtime‑loaded UI components via SystemJS + import maps.
 - A server runtime that supports pluggable handlers and plugins.
@@ -9,32 +11,64 @@ Build a dynamic chat platform with:
 - A local, Git‑managed plugin workspace with hot reload.
 
 ## Non-goals (initially)
+
 - Multi-tenant SaaS.
 - Running arbitrary untrusted plugins without sandboxing.
 - Full native import map dynamism (use SystemJS import maps).
 
 ## Repo layout (target)
-- `apps/server`: server, WS + REST, plugin runtime.
+
+- `apps/server-ws`: WS server + plugin runtime.
+- `apps/server-rest`: REST server.
 - `apps/client`: React shell, SystemJS loader, state + slots.
 - `packages/protocol`: shared WS/REST schemas and TS types.
 - `packages/ui-core`: reusable UI components and theming.
-- `apps/server/plugins-workspace`: git-managed plugin sources.
-- `apps/server/plugins-dist`: built plugin artifacts served to clients.
+- `apps/server-ws/plugins-workspace`: git-managed plugin sources.
+- `apps/server-ws/plugins-dist`: built plugin artifacts served to clients.
+
+## Frontend guidance
+
+- For frontend/UI activities, follow `apps/client/AGENTS.md` for patterns and documentation templates.
 
 ## Repo conventions
+
 - Use Nx commands via `pnpx nx`.
+- When running Nx commands, add `--output-style=stream` so logs are visible.
 - Use `pnpm`/`pnpx` (no `npm`/`npx`).
 - Keep TypeScript as the default language.
 - Prefer Nx generators for new apps/libs.
+- Event payload schemas live in server-core strategies as `eventDefinitions` and are code-generated into `libs/protocol-generated`.
 - Add module-specific `AGENTS.md` files under `apps/<name>/` or `packages/<name>/`.
 - Use Context7 for templates and documentation lookups.
 - Use the GitHub MCP server for repo management tasks.
+- Use the Playwright MCP server for browser automation tasks.
 - Use the NX MCP server as listed below for development tasks.
+- Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
+- To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugin isolation disabled, `--parallel=1`, and lint for `protocol-generated`/`server-core` run separately due to Nx flakiness).
+- Before `format:check`, run `pnpm nx format:write --all --output-style=stream` to keep formatting clean.
+- When working on frontend components, follow `docs/frontend/UX.MD` for UX rules.
+
+## Runtime bootstrap
+
+- Bootstrap client state via REST (initial snapshot) before connecting to WebSocket event stream.
+- After snapshot load, subscribe to WS and apply events in order; treat REST as a one-time seed and WS as the source of truth.
+- If WS reconnects, re-bootstrap (or request missed events) to avoid divergence.
+
+## Event schema generation
+
+- Author event payload schemas by exporting `eventDefinitions` in
+  `apps/server-core/src/event/strategies/*.strategy.ts`.
+- Regenerate the shared client-safe schemas/types:
+  `pnpx nx run protocol-generated:generate --output-style=stream`
+- Use the generator when adding new event handlers:
+  `pnpx nx g event-strategy --name user-message --eventType user.message`
 
 ## Detailed specs
+
 - See `subagents.md` for detailed protocol/runtime/plugin/test requirements and implementation notes.
 
 ## Module AGENTS.md boilerplate
+
 Add a local `AGENTS.md` to extend/override guidance within a module:
 
 ```
@@ -52,12 +86,30 @@ Add a local `AGENTS.md` to extend/override guidance within a module:
 - Frameworks: <list>
 - Testing: <list>
 
+## Bootstrap
+<REST snapshot + WS events notes>
+
 ## Patterns
 - Conventions: <list>
 - File layout: <list>
 - Commands: <pnpx nx ...>
 ```
 
+## MCP tool usage examples
+
+Use these as templates when the task matches:
+
+- GitHub MCP (repo management): list open PRs, add a comment, or create a branch.
+  - Example: `mcp__github__list_pull_requests` to review open PRs.
+  - Example: `mcp__github__add_issue_comment` to leave feedback on an issue/PR.
+  - Example: `mcp__github__create_branch` before pushing changes.
+- Context7 (docs/templates): resolve a library ID, then query docs for a specific task.
+  - Example: `mcp__context7__resolve-library-id` with `libraryName: "react"` and a focused query like "useEffect cleanup".
+  - Example: `mcp__context7__query-docs` with the resolved library ID to fetch code examples.
+- Playwright (browser automation): navigate, inspect, and interact with pages.
+  - Example: `mcp__playwright__browser_navigate` to open a URL.
+  - Example: `mcp__playwright__browser_snapshot` to capture an accessibility tree for analysis.
+  - Example: `mcp__playwright__browser_click` and `mcp__playwright__browser_fill_form` to exercise UI flows.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

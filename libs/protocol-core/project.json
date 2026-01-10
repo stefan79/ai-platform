@@ -1,0 +1,27 @@
+{
+  "name": "protocol-core",
+  "root": "libs/protocol-core",
+  "sourceRoot": "libs/protocol-core/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/protocol-core"],
+      "options": {
+        "command": "pnpm exec tsc -p libs/protocol-core/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/protocol-core/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/protocol-core/vitest.config.ts"
+      }
+    }
+  }
+}

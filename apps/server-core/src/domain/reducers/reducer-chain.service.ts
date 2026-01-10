@@ -1,0 +1,54 @@
+import { Injectable } from '@nestjs/common';
+import { Effect } from 'effect';
+import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
+import type { OutboxRecord } from '../outbox';
+import type { DomainEventRecord } from '../events';
+import type { Reducer, ReduceContext } from './reducer.types';
+import { ServerReducer } from './server.reducer';
+import { UserReducer } from './user.reducer';
+import { ThreadReducer } from './thread.reducer';
+
+export interface ReductionResult {
+  domainEvents: DomainEventRecord[];
+  outboxRecords: OutboxRecord[];
+}
+
+const emptyReduction: ReductionResult = {
+  domainEvents: [],
+  outboxRecords: [],
+};
+
+@Injectable()
+export class ReducerChainService {
+  private readonly reducers: Reducer[];
+
+  constructor(server: ServerReducer, user: UserReducer, thread: ThreadReducer) {
+    this.reducers = [server, user, thread];
+  }
+
+  reduce(message: CommandKafkaEnvelope, context: ReduceContext) {
+    return Effect.tryPromise({
+      try: async () => {
+        let result = emptyReduction;
+
+        for (const reducer of this.reducers) {
+          const reduction = await reducer.reduce(message, context);
+
+          if (!reduction) {
+            continue;
+          }
+
+          console.log('Reducer', reducer.constructor.name, 'produced', reduction);
+
+          result = {
+            domainEvents: [...result.domainEvents, ...reduction.domainEvents],
+            outboxRecords: [...result.outboxRecords, ...reduction.outboxRecords],
+          };
+        }
+
+        return result;
+      },
+      catch: (error) => error as Error,
+    });
+  }
+}

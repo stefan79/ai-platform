@@ -1,0 +1,9 @@
+{
+  "generators": {
+    "event-strategy": {
+      "factory": "./tools/generators/event-strategy/index.ts",
+      "schema": "./tools/generators/event-strategy/schema.json",
+      "description": "Scaffold a server-core event strategy with eventDefinitions export."
+    }
+  }
+}

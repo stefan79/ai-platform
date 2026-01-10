@@ -1,0 +1,36 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "strict": true,
+    "target": "es2021",
+    "module": "commonjs",
+    "noEmit": true,
+    "lib": ["es2021", "dom"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@ai-platform/context-core": ["libs/context-core/src/index.ts"],
+      "@ai-platform/protocol-core": ["libs/protocol-core/src/index.ts"],
+      "@ai-platform/protocol-rest": ["libs/protocol-rest/src/index.ts"],
+      "@ai-platform/protocol-ws": ["libs/protocol-ws/src/index.ts"],
+      "@ai-platform/design-tokens": ["libs/design-tokens/src/index.ts"],
+      "@ai-platform/design-tokens/styles.css": ["libs/design-tokens/src/styles.css"],
+      "@ai-platform/protocol-generated": ["libs/protocol-generated/src/index.ts"],
+      "@effect/schema": ["libs/effect-schema/src/index.ts"],
+      "@effect/schema/Schema": ["libs/effect-schema/src/Schema.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

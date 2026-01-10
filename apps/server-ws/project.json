@@ -1,0 +1,54 @@
+{
+  "name": "server-ws",
+  "root": "apps/server-ws",
+  "sourceRoot": "apps/server-ws/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/server-ws"],
+      "options": {
+        "command": "pnpm exec tsc -p apps/server-ws/tsconfig.app.json"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "NODE_ENV=development TS_NODE_PROJECT=apps/server-ws/tsconfig.app.json pnpm exec ts-node-dev --respawn -r tsconfig-paths/register apps/server-ws/src/main.ts",
+        "env": {
+          "KAFKA_BROKERS": "localhost:9092",
+          "KAFKA_CLIENT_ID": "ai-platform-server-ws",
+          "KAFKA_GROUP_ID": "ai-platform-server-ws",
+          "KAFKA_EVENTS_TOPIC": "ai-platform-events",
+          "KAFKA_OUTBOX_TOPIC": "ai-platform-outbox",
+          "KAFKA_OUTBOX_GROUP_ID": "ai-platform-server-ws-outbox"
+        }
+      }
+    },
+    "serve:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node dist/apps/server-ws/main.js",
+        "env": {
+          "KAFKA_BROKERS": "localhost:9092",
+          "KAFKA_CLIENT_ID": "ai-platform-server-ws",
+          "KAFKA_GROUP_ID": "ai-platform-server-ws",
+          "KAFKA_EVENTS_TOPIC": "ai-platform-events"
+        }
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"apps/server-ws/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec jest --config apps/server-ws/jest.config.ts"
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { z } from 'zod';
+import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import type { EventHandler } from './event-handler';
+import type { ServerContext } from '../../domain/server-context';
+
+const <%= fileName %>BodySchema = z
+  .object({
+    timestamp: z.number().int().nonnegative(),
+    body: z.string(),
+  })
+  .strict();
+
+export const eventDefinitions = [
+  {
+    type: '<%= eventType %>',
+    schema: <%= fileName %>BodySchema,
+  },
+] as const;
+
+@Injectable()
+export class <%= className %>Strategy implements EventHandler<EventKafkaEnvelope> {
+  private readonly logger = new Logger(<%= className %>Strategy.name);
+
+  register(context: ServerContext): void {
+    eventDefinitions.forEach((definition) =>
+      context.eventSchemaRegistry.register(definition.type, definition.schema),
+    );
+    context.registerEventHandler(this);
+  }
+
+  match(envelope: EventKafkaEnvelope): boolean {
+    return envelope.type === '<%= eventType %>';
+  }
+
+  async handle(envelope: EventKafkaEnvelope): Promise<void> {
+    if (!this.match(envelope)) {
+      this.logger.debug(`No strategy for message type ${envelope.type}`);
+      return;
+    }
+
+    const payload = <%= fileName %>BodySchema.parse(envelope.body);
+    this.logger.log({ payload }, 'Handled event');
+  }
+}

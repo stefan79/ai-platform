@@ -12,6 +12,8 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
   private context?: ServerContext;
   private readonly userMessageBodySchema = z
     .object({
+      messageId: z.string().uuid(),
+      threadId: z.string(),
       timestamp: z.number().int().nonnegative(),
       body: z.string(),
     })

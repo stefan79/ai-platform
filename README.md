@@ -21,6 +21,27 @@ Start the client shell (mocked UI) on `http://localhost:4300`:
 pnpx nx run client:serve --output-style=stream
 ```
 
+## Protocol generation
+
+Event payload schemas are registered in server-core strategies and code-generated into a shared,
+browser-safe library for the client.
+
+- Source of truth: `apps/server-core/src/event/strategies/*.strategy.ts` exports
+  `eventDefinitions` with `{ type, schema }`.
+- Generated output: `libs/protocol-generated/src/events.ts`
+
+Regenerate the shared schemas/types:
+
+```sh
+pnpx nx run protocol-generated:generate --output-style=stream
+```
+
+Create a new event strategy (scaffolded with `eventDefinitions`):
+
+```sh
+pnpx nx g event-strategy --name user-message --eventType user.message
+```
+
 Optional development servers:
 
 ```sh

@@ -20,6 +20,9 @@ const appShellStateSchema = Schema.Struct({
   layoutMode: Schema.Literal('split', 'focused'),
   activePane: Schema.Literal('sidebar', 'main'),
   lastEventId: Schema.String,
+  title: Schema.String,
+  subtitle: Schema.String,
+  version: Schema.String,
 });
 
 export type AppShellState = Schema.To<typeof appShellStateSchema>;
@@ -248,7 +251,14 @@ export type OverlayManagerState = Schema.To<typeof overlayManagerStateSchema>;
 
 export const appShellModel = model<AppShellState>(
   appShellStateSchema,
-  { layoutMode: 'split', activePane: 'main', lastEventId: 'evt-0' },
+  {
+    layoutMode: 'split',
+    activePane: 'main',
+    lastEventId: 'evt-0',
+    title: 'AI Platform',
+    subtitle: 'Mocked Client',
+    version: '0.1.0',
+  },
   ['ShellLayoutChanged', 'ShellActivePaneChanged'],
 );
 

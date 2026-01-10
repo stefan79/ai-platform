@@ -1,76 +1,12 @@
-import type { ReactNode } from 'react';
 import { uiModels } from './models';
-import { cn } from './lib/utils';
 import { Badge } from './components/ui/badge';
 import { Button } from './components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
-
-type CardProps = {
-  title: string;
-  subtitle?: string;
-  children: ReactNode;
-  events?: readonly string[];
-  footer?: ReactNode;
-  layout?: 'column' | 'row';
-  ariaLabel?: string;
-  className?: string;
-  mockId?: string;
-};
-
-const Panel = ({
-  title,
-  subtitle,
-  children,
-  events = [],
-  footer,
-  layout = 'column',
-  ariaLabel,
-  className,
-  mockId,
-}: CardProps) => (
-  <Card
-    aria-label={ariaLabel ?? title}
-    className={cn('panel', className)}
-    data-mock-id={mockId ?? title}
-  >
-    <CardHeader
-      className={cn(
-        layout === 'row'
-          ? 'flex-row items-center justify-between gap-4 space-y-0'
-          : 'flex-col gap-2 space-y-0',
-      )}
-    >
-      <div>
-        <CardDescription>{subtitle ?? 'Component'}</CardDescription>
-        <CardTitle>{title}</CardTitle>
-        {mockId && (
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            ID: {mockId}
-          </p>
-        )}
-      </div>
-      {events.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {events.map((event) => (
-            <Badge key={event} variant="outline">
-              {event}
-            </Badge>
-          ))}
-        </div>
-      )}
-    </CardHeader>
-    <CardContent className="space-y-3">{children}</CardContent>
-    {footer && <CardFooter className="text-sm text-muted-foreground">{footer}</CardFooter>}
-  </Card>
-);
+import { AppShell } from './components/app-shell';
+import { useAppShellState } from './runtime';
+import { Panel } from './components/panel';
+import { MessageComposer } from './components/message-composer';
+import { MessageTimeline } from './components/message-timeline';
 
 function SidebarToggle({ isCollapsed, isEnabled }: { isCollapsed: boolean; isEnabled: boolean }) {
   return (
@@ -319,155 +255,6 @@ function ThreadHeader() {
   );
 }
 
-function MessageBubble({
-  bubble,
-  content,
-  contextMenuLabel,
-}: {
-  bubble: { messageId: string; actorRole: string; timestamp: string; status: string };
-  content: { messageId: string; content: string; format: string };
-  contextMenuLabel: string;
-}) {
-  const roleClass =
-    bubble.actorRole === 'assistant'
-      ? 'border-primary/60 bg-primary/10'
-      : bubble.actorRole === 'system'
-        ? 'border-muted bg-muted/40'
-        : 'border-border bg-card';
-  return (
-    <Card className={cn('space-y-2', roleClass)}>
-      <CardContent className="space-y-2 p-4">
-        <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
-        <span>
-          {bubble.actorRole} • {bubble.timestamp}
-        </span>
-        <Badge variant="outline" className="text-[11px] normal-case">
-          {bubble.status}
-        </Badge>
-        </div>
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          ID: {bubble.messageId}
-        </p>
-        <p className="text-sm">{content.content}</p>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Format: {content.format}</span>
-          <span>Context menu: {contextMenuLabel}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MessageTimeline({ className }: { className?: string }) {
-  const timeline = uiModels.messageTimeline.defaultState;
-  const bubbles = new Map(
-    uiModels.messageBubbles.map((model) => [model.defaultState.messageId, model.defaultState]),
-  );
-  const contents = new Map(
-    uiModels.messageContents.map((model) => [model.defaultState.messageId, model.defaultState]),
-  );
-  const contextMenus = new Map(
-    uiModels.messageContextMenus.map((model) => [model.defaultState.messageId, model.defaultState]),
-  );
-
-  return (
-    <Panel
-      title="MessageTimeline"
-      subtitle="Main Pane"
-      events={uiModels.messageTimeline.events}
-      ariaLabel="Message timeline"
-      className={className}
-      mockId="mock.message-timeline"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Thread: {timeline.threadId}</span>
-        <span>Anchor: {timeline.scrollAnchor}</span>
-      </div>
-      <div className="space-y-3">
-        {timeline.messageIds.map((id) => (
-          <MessageBubble
-            key={id}
-            bubble={bubbles.get(id)!}
-            content={contents.get(id)!}
-            contextMenuLabel={contextMenus.get(id)?.isOpen ? 'Open' : 'Closed'}
-          />
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-function Composer() {
-  const composer = uiModels.messageComposer.defaultState;
-  const input = uiModels.composerInput.defaultState;
-  const toolbar = uiModels.composerToolbar.defaultState;
-  const palette = uiModels.commandPalette.defaultState;
-
-  return (
-    <Panel
-      title="MessageComposer"
-      subtitle="Main Pane"
-      events={[
-        ...uiModels.messageComposer.events,
-        ...uiModels.composerInput.events,
-        ...uiModels.composerToolbar.events,
-      ]}
-      ariaLabel="Message composer"
-      mockId="mock.message-composer"
-    >
-      <div className="rounded-md border border-border bg-muted/30 p-3">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Draft length: {composer.draftText.length} • Cursor: {input.cursorPosition}
-          </span>
-          <span>Actors: {composer.selectedActors.join(', ')}</span>
-        </div>
-        <div className="mt-2 rounded-md border border-dashed border-border bg-card px-3 py-2 text-sm text-muted-foreground">
-          ComposerInput: &quot;{input.draftText || 'Empty draft'}&quot; (
-          {input.isFocused ? 'Focused' : 'Blurred'})
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {toolbar.availableCommands.map((command) => (
-            <Badge
-              key={command}
-              variant={toolbar.activeCommandId === command ? 'accent' : 'outline'}
-            >
-              {command}
-            </Badge>
-          ))}
-          <Badge variant="default" className="text-[11px] normal-case">
-            Active: {toolbar.activeCommandId}
-          </Badge>
-        </div>
-      </div>
-      <div className="rounded-md border border-border bg-muted/30 p-3">
-        <p className="text-sm font-semibold">CommandPalette</p>
-        <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>Open: {palette.isOpen ? 'Yes' : 'No'}</span>
-          <span>
-            Query: &quot;{palette.query || 'empty'}&quot; • Highlighted:{' '}
-            {palette.highlightedIndex + 1}/{palette.results.length}
-          </span>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {palette.results.map((result) => (
-            <Badge
-              key={result}
-              variant="outline"
-            >
-              {result}
-            </Badge>
-          ))}
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Submission: {composer.isSubmitting ? 'Pending' : 'Idle'} • Last event:{' '}
-        {composer.lastEventId}
-      </p>
-    </Panel>
-  );
-}
-
 function ThreadOverviewDrawer() {
   const drawer = uiModels.threadOverviewDrawer.defaultState;
   return (
@@ -606,54 +393,19 @@ function MainPane() {
       <MessageTimeline className="timeline-panel flex-1" />
       {/* Bottom stack keeps composer anchored while reserving space for the drawer. */}
       <div className="main-pane__bottom mt-auto space-y-4">
-        <Composer />
+        <MessageComposer />
         <ThreadOverviewDrawer />
       </div>
     </section>
   );
 }
 
-function AppShell({ children }: { children: ReactNode }) {
-  const shell = uiModels.appShell.defaultState;
-  return (
-    <section
-      className="app-shell rounded-xl border border-border bg-card/90 shadow-lg"
-      aria-label="App shell"
-      data-mock-id="mock.app-shell"
-    >
-      <header className="app-shell__header flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-4">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">AppShell</p>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            ID: mock.app-shell
-          </p>
-          <h1 className="text-2xl font-semibold">AI Platform – Mocked Client</h1>
-          <p className="text-sm text-muted-foreground">
-            Layout: {shell.layoutMode} • Active pane: {shell.activePane} • Last event:{' '}
-            {shell.lastEventId}
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2 text-[11px] text-muted-foreground">
-          {uiModels.appShell.events.map((event) => (
-            <span
-              key={event}
-              className="rounded-full border border-border px-3 py-1 uppercase tracking-wide"
-            >
-              {event}
-            </span>
-          ))}
-        </div>
-      </header>
-      <div className="app-shell__body space-y-6 p-6">{children}</div>
-    </section>
-  );
-}
-
 function App() {
+  const shell = useAppShellState();
   return (
     <main className="app-root min-h-screen bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.15),_transparent_55%),linear-gradient(135deg,_rgba(16,20,43,0.95),_rgba(11,16,33,0.95))] text-foreground">
       <div className="app-container mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10">
-        <AppShell>
+        <AppShell shell={shell}>
           <div className="layout-grid grid gap-6 lg:grid-cols-[320px,1fr]">
             <Sidebar />
             <MainPane />

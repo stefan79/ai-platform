@@ -1,0 +1,33 @@
+{
+  "name": "protocol-generated",
+  "root": "libs/protocol-generated",
+  "sourceRoot": "libs/protocol-generated/src",
+  "projectType": "library",
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsx tools/scripts/generate-event-definitions.ts"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/protocol-generated"],
+      "options": {
+        "command": "pnpm exec tsx tools/scripts/generate-event-definitions.ts && pnpm exec tsc -p libs/protocol-generated/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"libs/protocol-generated/src/**/*.{ts,tsx}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run --config libs/protocol-generated/vitest.config.ts"
+      }
+    }
+  }
+}

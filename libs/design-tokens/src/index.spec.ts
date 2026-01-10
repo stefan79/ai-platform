@@ -2,7 +2,6 @@ import {
   designTokens,
   designTokensClassName,
   designTokensStylesheet,
-  tailwindPreset,
 } from './index';
 
 describe('design tokens', () => {
@@ -10,6 +9,5 @@ describe('design tokens', () => {
     expect(designTokens.colors.accent).toBeDefined();
     expect(designTokensClassName).toBe('ai-platform-theme');
     expect(designTokensStylesheet).toContain('design-tokens/styles.css');
-    expect(tailwindPreset.theme?.extend?.colors).toBeDefined();
   });
 });

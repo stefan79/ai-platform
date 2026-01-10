@@ -37,6 +37,7 @@ Build a dynamic chat platform with:
 - Use `pnpm`/`pnpx` (no `npm`/`npx`).
 - Keep TypeScript as the default language.
 - Prefer Nx generators for new apps/libs.
+- Event payload schemas live in server-core strategies as `eventDefinitions` and are code-generated into `libs/protocol-generated`.
 - Add module-specific `AGENTS.md` files under `apps/<name>/` or `packages/<name>/`.
 - Use Context7 for templates and documentation lookups.
 - Use the GitHub MCP server for repo management tasks.
@@ -50,6 +51,15 @@ Build a dynamic chat platform with:
 - Bootstrap client state via REST (initial snapshot) before connecting to WebSocket event stream.
 - After snapshot load, subscribe to WS and apply events in order; treat REST as a one-time seed and WS as the source of truth.
 - If WS reconnects, re-bootstrap (or request missed events) to avoid divergence.
+
+## Event schema generation
+
+- Author event payload schemas by exporting `eventDefinitions` in
+  `apps/server-core/src/event/strategies/*.strategy.ts`.
+- Regenerate the shared client-safe schemas/types:
+  `pnpx nx run protocol-generated:generate --output-style=stream`
+- Use the generator when adding new event handlers:
+  `pnpx nx g event-strategy --name user-message --eventType user.message`
 
 ## Detailed specs
 

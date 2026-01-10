@@ -20,4 +20,4 @@ export const designTokens = {
 export const designTokensClassName = 'ai-platform-theme';
 export const designTokensStylesheet = '@ai-platform/design-tokens/styles.css';
 
-export { default as tailwindPreset } from './tailwindPreset';
+export { logoSvg } from './logo';

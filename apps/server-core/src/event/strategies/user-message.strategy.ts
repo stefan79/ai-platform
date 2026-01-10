@@ -10,21 +10,49 @@ import { kafkaConfig } from '../../config';
 import type { EventHandler } from './event-handler';
 import type { ServerContext } from '../../domain/server-context';
 
+const userMessageBodySchema = z
+  .object({
+    messageId: z.string().uuid(),
+    threadId: z.string(),
+    timestamp: z.number().int().nonnegative(),
+    body: z.string(),
+  })
+  .strict();
+
+export const assistantMessageSchema = z
+  .object({
+    messageId: z.string().uuid(),
+    responseTo: z.string().uuid(),
+    threadId: z.string(),
+    assistantId: z.string().uuid(),
+    timestamp: z.number().int().nonnegative(),
+    body: z.string(),
+  })
+  .strict();
+
+export const eventDefinitions = [
+  {
+    type: 'user.message',
+    schema: userMessageBodySchema,
+  },
+  {
+    type: 'assistant.message',
+    schema: assistantMessageSchema,
+  },
+] as const;
+
 @Injectable()
 export class UserMessageStrategy implements EventHandler<EventKafkaEnvelope> {
   private readonly logger = new Logger(UserMessageStrategy.name);
-  private readonly userMessageBodySchema = z
-    .object({
-      timestamp: z.number().int().nonnegative(),
-      body: z.string(),
-    })
-    .strict();
+  private readonly userMessageBodySchema = userMessageBodySchema;
 
   private context?: ServerContext;
 
   register(context: ServerContext): void {
     this.context = context;
-    context.eventSchemaRegistry.register('user.message', this.userMessageBodySchema);
+    eventDefinitions.forEach((definition) =>
+      context.eventSchemaRegistry.register(definition.type, definition.schema),
+    );
     context.registerEventHandler(this);
   }
 
@@ -56,6 +84,8 @@ export class UserMessageStrategy implements EventHandler<EventKafkaEnvelope> {
       userId: envelope.userId,
       payload: {
         prompt: userMessage.body,
+        responseTo: userMessage.messageId,
+        threadId: userMessage.threadId,
       },
     };
 

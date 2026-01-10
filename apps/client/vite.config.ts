@@ -36,6 +36,10 @@ export default defineConfig({
         find: /^@ai-platform\/protocol-ws$/,
         replacement: path.resolve(__dirname, '../../libs/protocol-ws/src/index.ts'),
       },
+      {
+        find: /^@ai-platform\/protocol-generated$/,
+        replacement: path.resolve(__dirname, '../../libs/protocol-generated/src/index.ts'),
+      },
     ],
   },
   server: {

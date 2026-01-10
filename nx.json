@@ -51,6 +51,7 @@
     "protocol-ws": "libs/protocol-ws",
     "protocol-core": "libs/protocol-core",
     "design-tokens": "libs/design-tokens",
+    "protocol-generated": "libs/protocol-generated",
     "infra": "tools/infra",
     "server-core": "apps/server-core"
   }

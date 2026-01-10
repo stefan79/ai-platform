@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Event Strategy",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Strategy name (e.g. user-message)"
+    },
+    "eventType": {
+      "type": "string",
+      "description": "Event type string (e.g. user.message)"
+    }
+  },
+  "required": ["name", "eventType"]
+}

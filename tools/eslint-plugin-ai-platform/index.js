@@ -39,7 +39,8 @@ module.exports = {
             }
             context.report({
               node,
-              message: 'Event strategies must export `eventDefinitions` to support protocol generation.',
+              message:
+                'Event strategies must export `eventDefinitions` to support protocol generation.',
             });
           },
         };

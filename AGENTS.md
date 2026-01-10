@@ -66,6 +66,7 @@ Build a dynamic chat platform with:
 ## Detailed specs
 
 - See `subagents.md` for detailed protocol/runtime/plugin/test requirements and implementation notes.
+- Domain events + CQRS snapshots spec: `spec/v0.2.0-domain-events-cqrs.md` (fixed domain model, extend via commands/event processing).
 
 ## Module AGENTS.md boilerplate
 

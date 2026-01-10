@@ -42,6 +42,17 @@ Create a new event strategy (scaffolded with `eventDefinitions`):
 pnpx nx g event-strategy --name user-message --eventType user.message
 ```
 
+## Domain events and snapshots (spec)
+
+The v0.2.0 domain events + CQRS snapshot design is captured in:
+
+- `spec/v0.2.0-domain-events-cqrs.md`
+
+Notes:
+
+- Domain event schemas for server/user/thread are fixed in server-core (explicit Zod schemas).
+- Outbox effects include a domain-change topic published from the same DynamoDB transaction.
+
 Optional development servers:
 
 ```sh
@@ -55,11 +66,17 @@ Start local infrastructure dependencies (Redpanda + DynamoDB Local):
 pnpx nx run infra:up --output-style=stream
 ```
 
-Set up infrastructure (creates Kafka topics for the WS server):
+Set up infrastructure (creates Kafka topics and DynamoDB tables, seeds a thread snapshot):
 
 ```sh
 bash scripts/setup-infrastructure.sh
 ```
+
+Optional overrides for infrastructure setup:
+
+- `KAFKA_DOMAIN_CHANGES_TOPIC` (default `ai-platform-domain-changes`)
+- `DYNAMODB_SNAPSHOTS_TABLE` (default `ai-platform-snapshots`)
+- `THREAD_ID` / `USER_ID` (seeded thread snapshot IDs)
 
 Send a test user message over WebSocket:
 

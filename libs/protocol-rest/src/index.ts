@@ -1,14 +1,25 @@
 export {
   createHealthResponse,
   createServerDetailsResponse,
+  createThreadMessagesResponse,
   createVersionResponse,
   healthResponseSchema,
   parseHealthResponse,
   parseServerDetailsResponse,
+  parseThreadMessagesResponse,
   parseRestEnvelope,
   parseVersionResponse,
   restEnvelopeSchema,
   serverDetailsSchema,
+  threadMessageSchema,
+  threadMessagesResponseSchema,
   versionResponseSchema,
 } from './schemas';
-export type { HealthResponse, RestEnvelope, ServerDetails, VersionResponse } from './schemas';
+export type {
+  HealthResponse,
+  RestEnvelope,
+  ServerDetails,
+  ThreadMessage,
+  ThreadMessagesResponse,
+  VersionResponse,
+} from './schemas';

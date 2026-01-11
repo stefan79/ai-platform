@@ -173,8 +173,8 @@ if ! aws dynamodb describe-table \
     --cli-connect-timeout "$AWS_CLI_CONNECT_TIMEOUT" \
     --cli-read-timeout "$AWS_CLI_READ_TIMEOUT" \
     --table-name "$DYNAMODB_DOMAIN_TABLE" \
-    --attribute-definitions AttributeName=eventId,AttributeType=S \
-    --key-schema AttributeName=eventId,KeyType=HASH \
+    --attribute-definitions AttributeName=pk,AttributeType=S AttributeName=sk,AttributeType=S \
+    --key-schema AttributeName=pk,KeyType=HASH AttributeName=sk,KeyType=RANGE \
     --billing-mode PAY_PER_REQUEST >/dev/null
 fi
 

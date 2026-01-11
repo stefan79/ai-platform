@@ -57,6 +57,7 @@ export function MessageComposer() {
       return;
     }
     threadBus.publish({
+      kind: 'single',
       threadId,
       payloadType: 'user.message',
       payload: {

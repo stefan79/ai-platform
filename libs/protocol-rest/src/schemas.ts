@@ -29,6 +29,27 @@ export const serverDetailsSchema = z.record(
 
 export type ServerDetails = z.infer<typeof serverDetailsSchema>;
 
+export const threadMessageSchema = z
+  .object({
+    messageId: z.string().uuid(),
+    threadId: z.string(),
+    authorId: z.string(),
+    timestamp: z.number().int().nonnegative(),
+    body: z.string(),
+  })
+  .strict();
+
+export type ThreadMessage = z.infer<typeof threadMessageSchema>;
+
+export const threadMessagesResponseSchema = z
+  .object({
+    items: z.array(threadMessageSchema),
+    cursor: z.string().optional(),
+  })
+  .strict();
+
+export type ThreadMessagesResponse = z.infer<typeof threadMessagesResponseSchema>;
+
 export function createVersionResponse(context: Pick<ContextState, 'version'>): VersionResponse {
   return versionResponseSchema.parse({ version: context.version });
 }
@@ -44,6 +65,12 @@ export function createServerDetailsResponse(details: ServerDetails): ServerDetai
   return serverDetailsSchema.parse(details);
 }
 
+export function createThreadMessagesResponse(
+  response: ThreadMessagesResponse,
+): ThreadMessagesResponse {
+  return threadMessagesResponseSchema.parse(response);
+}
+
 export function parseVersionResponse(payload: unknown): VersionResponse {
   return versionResponseSchema.parse(payload);
 }
@@ -54,6 +81,10 @@ export function parseHealthResponse(payload: unknown): HealthResponse {
 
 export function parseServerDetailsResponse(payload: unknown): ServerDetails {
   return serverDetailsSchema.parse(payload);
+}
+
+export function parseThreadMessagesResponse(payload: unknown): ThreadMessagesResponse {
+  return threadMessagesResponseSchema.parse(payload);
 }
 
 export const restEnvelopeSchema = restCoreEnvelopeSchema.extend({

@@ -128,83 +128,89 @@ const reduce = (state: AppState, action: AppAction): AppState => {
     }
     case 'thread.event': {
       const event = action.event;
+      if (event.kind === 'history') {
+        const sorted = [...event.messages].sort((left, right) => left.timestamp - right.timestamp);
+        return {
+          ...state,
+          messages: sorted,
+          composerLocked: false,
+        };
+      }
+
+      const payloads =
+        event.kind === 'batch' ? event.payloads : event.kind === 'single' ? [event.payload] : [];
+
       return match(event.payloadType)
         .with('user.message', () => {
-          const userPayload = event.payload as {
-            messageId: string;
-            threadId: string;
-            timestamp: number;
-            body: string;
-          };
-          const userMessage: ThreadMessage = {
-            id: userPayload.messageId,
+          const userMessages: ThreadMessage[] = payloads.map((payload) => ({
+            id: payload.messageId,
             role: 'user',
-            timestamp: userPayload.timestamp,
-            body: userPayload.body,
+            timestamp: payload.timestamp,
+            body: payload.body,
             status: 'complete',
-            threadId: userPayload.threadId,
-          };
-          const placeholder: ThreadMessage = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            timestamp: Date.now(),
-            body: 'Waiting for assistant response…',
-            status: 'pending',
-            responseTo: userPayload.messageId,
-            threadId: userPayload.threadId,
-          };
+            threadId: payload.threadId,
+          }));
+          const placeholders: ThreadMessage[] =
+            event.kind === 'single'
+              ? [
+                  {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    timestamp: Date.now(),
+                    body: 'Waiting for assistant response…',
+                    status: 'pending',
+                    responseTo: payloads[0]?.messageId,
+                    threadId: payloads[0]?.threadId ?? '',
+                  },
+                ]
+              : [];
           return {
             ...state,
-            messages: [...state.messages, userMessage, placeholder],
-            composerLocked: true,
+            messages: [...state.messages, ...userMessages, ...placeholders],
+            composerLocked: event.kind === 'single' ? true : state.composerLocked,
           };
         })
         .with('assistant.message', () => {
-          const assistantPayload = event.payload as {
-            messageId: string;
-            responseTo: string;
-            threadId: string;
-            assistantId: string;
-            timestamp: number;
-            body: string;
-          };
           const updated = state.messages.map((message) => {
-            if (
-              message.role === 'assistant' &&
-              message.status === 'pending' &&
-              message.responseTo === assistantPayload.responseTo
-            ) {
+            const matchPayload = payloads.find(
+              (payload) =>
+                message.role === 'assistant' &&
+                message.status === 'pending' &&
+                message.responseTo === payload.responseTo,
+            );
+            if (matchPayload) {
               return {
-                id: assistantPayload.messageId,
+                id: matchPayload.messageId,
                 role: 'assistant',
-                timestamp: assistantPayload.timestamp,
-                body: assistantPayload.body,
+                timestamp: matchPayload.timestamp,
+                body: matchPayload.body,
                 status: 'complete',
-                responseTo: assistantPayload.responseTo,
-                assistantId: assistantPayload.assistantId,
-                threadId: assistantPayload.threadId,
+                responseTo: matchPayload.responseTo,
+                assistantId: matchPayload.assistantId,
+                threadId: matchPayload.threadId,
               } satisfies ThreadMessage;
             }
             return message;
           });
-          const hasReplacement = updated.some(
-            (message) => message.id === assistantPayload.messageId,
+          const appended = payloads.filter(
+            (payload) => !updated.some((message) => message.id === payload.messageId),
           );
-          const nextMessages = hasReplacement
-            ? updated
-            : [
-                ...updated,
-                {
-                  id: assistantPayload.messageId,
+          const nextMessages = [
+            ...updated,
+            ...appended.map(
+              (payload) =>
+                ({
+                  id: payload.messageId,
                   role: 'assistant',
-                  timestamp: assistantPayload.timestamp,
-                  body: assistantPayload.body,
+                  timestamp: payload.timestamp,
+                  body: payload.body,
                   status: 'complete',
-                  responseTo: assistantPayload.responseTo,
-                  assistantId: assistantPayload.assistantId,
-                  threadId: assistantPayload.threadId,
-                } satisfies ThreadMessage,
-              ];
+                  responseTo: payload.responseTo,
+                  assistantId: payload.assistantId,
+                  threadId: payload.threadId,
+                }) satisfies ThreadMessage,
+            ),
+          ];
           return {
             ...state,
             messages: nextMessages,

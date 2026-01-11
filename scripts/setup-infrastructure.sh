@@ -212,8 +212,9 @@ if ! aws dynamodb describe-table \
     --billing-mode PAY_PER_REQUEST >/dev/null
 fi
 
-THREAD_ID="${THREAD_ID:-thread-1}"
-USER_ID="${USER_ID:-user-1}"
+THREAD_ID="${THREAD_ID:-550e8400-e29b-41d4-a716-446655440000}"
+USER_ID="${USER_ID:-6f9a2c1b-0c4d-4f8f-8b0a-1a2b3c4d5e6f}"
+THREAD_TITLE="${THREAD_TITLE:-Seeded Thread}"
 THREAD_PK="AGG#thread#${THREAD_ID}"
 THREAD_SK="SNAPSHOT#0"
 aws dynamodb put-item \
@@ -227,6 +228,7 @@ aws dynamodb put-item \
     \"sk\": {\"S\": \"${THREAD_SK}\"},
     \"threadId\": {\"S\": \"${THREAD_ID}\"},
     \"userId\": {\"S\": \"${USER_ID}\"},
+    \"title\": {\"S\": \"${THREAD_TITLE}\"},
     \"lastMessage\": {\"NULL\": true},
     \"updatedAt\": {\"N\": \"0\"},
     \"version\": {\"N\": \"0\"}

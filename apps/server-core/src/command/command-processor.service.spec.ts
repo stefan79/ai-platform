@@ -27,11 +27,12 @@ describe('MessageProcessorService', () => {
           eventId: 'event-1',
           aggregateId: 'user-1',
           aggregateType: 'user' as const,
-          domainEvent: true as const,
-          payload: { timestamp: 1, body: 'hello' },
+          type: 'user.profile-updated' as const,
+          payload: { displayName: 'hello' },
           occurredAt: 1,
         },
       ],
+      snapshots: [],
       outboxRecords: [],
     };
 

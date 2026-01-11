@@ -278,10 +278,10 @@ export const threadListModel = model<ThreadListState>(
   threadListStateSchema,
   {
     threads: [
-      { id: 't-1', title: 'Project Alpha' },
+      { id: '550e8400-e29b-41d4-a716-446655440000', title: 'Seeded Thread' },
       { id: 't-2', title: 'Runtime Notes' },
     ],
-    selectedThreadId: 't-1',
+    selectedThreadId: '550e8400-e29b-41d4-a716-446655440000',
     filter: '',
     lastEventId: 'evt-0',
   },
@@ -291,7 +291,12 @@ export const threadListModel = model<ThreadListState>(
 export const threadListItemModels: ReadonlyArray<Model<ThreadListItemState>> = [
   model<ThreadListItemState>(
     threadListItemStateSchema,
-    { threadId: 't-1', title: 'Project Alpha', unreadCount: 2, isSelected: true },
+    {
+      threadId: '550e8400-e29b-41d4-a716-446655440000',
+      title: 'Seeded Thread',
+      unreadCount: 2,
+      isSelected: true,
+    },
     ['ThreadItemSelected', 'ThreadItemMarkedRead'],
   ),
   model<ThreadListItemState>(
@@ -340,7 +345,11 @@ export const settingsPanelModel = model<SettingsPanelState>(
 
 export const mainPaneModel = model<MainPaneState>(
   mainPaneStateSchema,
-  { activeThreadId: 't-1', viewMode: 'timeline', lastEventId: 'evt-0' },
+  {
+    activeThreadId: '550e8400-e29b-41d4-a716-446655440000',
+    viewMode: 'timeline',
+    lastEventId: 'evt-0',
+  },
   ['MainThreadChanged', 'MainViewModeChanged'],
 );
 
@@ -352,13 +361,22 @@ export const systemStateBarModel = model<SystemStateBarState>(
 
 export const threadHeaderModel = model<ThreadHeaderState>(
   threadHeaderStateSchema,
-  { threadId: 't-1', title: 'Project Alpha', status: 'active', lastEventId: 'evt-0' },
+  {
+    threadId: '550e8400-e29b-41d4-a716-446655440000',
+    title: 'Seeded Thread',
+    status: 'active',
+    lastEventId: 'evt-0',
+  },
   ['ThreadHeaderUpdated'],
 );
 
 export const threadTitleModel = model<ThreadTitleState>(
   threadTitleStateSchema,
-  { threadId: 't-1', title: 'Project Alpha', isEditable: false },
+  {
+    threadId: '550e8400-e29b-41d4-a716-446655440000',
+    title: 'Seeded Thread',
+    isEditable: false,
+  },
   ['ThreadTitleEdited'],
 );
 
@@ -370,7 +388,12 @@ export const threadActionsModel = model<ThreadActionsState>(
 
 export const messageTimelineModel = model<MessageTimelineState>(
   messageTimelineStateSchema,
-  { threadId: 't-1', messageIds: ['m-1', 'm-2'], scrollAnchor: 'bottom', lastEventId: 'evt-0' },
+  {
+    threadId: '550e8400-e29b-41d4-a716-446655440000',
+    messageIds: ['m-1', 'm-2'],
+    scrollAnchor: 'bottom',
+    lastEventId: 'evt-0',
+  },
   ['TimelineLoaded', 'TimelineScrolled'],
 );
 
@@ -455,7 +478,7 @@ export const commandPaletteModel = model<CommandPaletteState>(
 export const threadOverviewDrawerModel = model<ThreadOverviewDrawerState>(
   threadOverviewDrawerStateSchema,
   {
-    threadId: 't-1',
+    threadId: '550e8400-e29b-41d4-a716-446655440000',
     isOpen: false,
     sections: ['summary', 'actors', 'files'],
     activeSectionId: 'summary',

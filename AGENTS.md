@@ -43,9 +43,11 @@ Build a dynamic chat platform with:
 - Use the GitHub MCP server for repo management tasks.
 - Use the Playwright MCP server for browser automation tasks.
 - Use the NX MCP server as listed below for development tasks.
+- GitHub repo: `git@github.com:stefan79/ai-platform.git` (use SSH for repo operations; issues/PRs live here).
 - Ensure code compiles, tests pass, and `README.md` is current before marking tasks complete.
 - To mirror CI locally, run `pnpm run ci:local` (non-interactive, full console output, plugin isolation disabled, `--parallel=1`, and lint for `protocol-generated`/`server-core` run separately due to Nx flakiness).
 - Before `format:check`, run `pnpm nx format:write --all --output-style=stream` to keep formatting clean.
+- Always finish work by running `pnpm nx format:write --all --output-style=stream`.
 - When working on frontend components, follow `docs/frontend/UX.MD` for UX rules.
 
 ## Runtime bootstrap

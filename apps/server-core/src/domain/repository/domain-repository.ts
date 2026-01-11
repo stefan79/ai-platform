@@ -57,19 +57,18 @@ type AggregateKey = {
 
 const aggregatePk = ({ aggregateType, aggregateId }: AggregateKey) =>
   `AGG#${aggregateType}#${aggregateId}`;
-const eventSk = (occurredAt: number, eventId: string) =>
-  `EVENT#${occurredAt}#${eventId}`;
+const eventSk = (occurredAt: number, eventId: string) => `EVENT#${occurredAt}#${eventId}`;
 const snapshotSk = (version: number) => `SNAPSHOT#${String(version).padStart(10, '0')}`;
 
 const encodeCursor = (key?: Record<string, unknown>) =>
   key ? Buffer.from(JSON.stringify(key)).toString('base64') : undefined;
 const decodeCursor = (cursor?: string) =>
-  cursor ? (JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as Record<string, unknown>) : undefined;
+  cursor
+    ? (JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as Record<string, unknown>)
+    : undefined;
 
 //TODO: Why is the snapshot type inference needed here? Can this be simplified?
-const inferAggregate = (
-  snapshot: ServerSnapshot | UserSnapshot | ThreadSnapshot,
-): AggregateKey => {
+const inferAggregate = (snapshot: ServerSnapshot | UserSnapshot | ThreadSnapshot): AggregateKey => {
   if ('serverId' in snapshot) {
     return { aggregateType: 'server', aggregateId: snapshot.serverId };
   }
@@ -275,7 +274,11 @@ export class DynamoDomainRepository implements DomainRepository {
     if (!item) {
       return null;
     }
-    const { pk, sk, aggregateType, aggregateId, ...snapshot } = item;
+    const snapshot = { ...item };
+    delete snapshot.pk;
+    delete snapshot.sk;
+    delete snapshot.aggregateType;
+    delete snapshot.aggregateId;
     return snapshot as T;
   }
 }

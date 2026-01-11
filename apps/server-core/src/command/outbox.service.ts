@@ -24,10 +24,7 @@ export class OutboxService {
     return Effect.tryPromise({
       try: async () => {
         const domainChangeRecords = result.domainEvents.map((event) =>
-          createOutboxRecord(
-            'kafka.domain-change',
-            createDomainChangeEnvelope(event),
-          ),
+          createOutboxRecord('kafka.domain-change', createDomainChangeEnvelope(event)),
         );
         const outboxRecords = [...result.outboxRecords, ...domainChangeRecords];
         this.logger.log(

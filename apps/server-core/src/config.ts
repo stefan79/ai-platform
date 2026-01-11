@@ -7,8 +7,7 @@ export const kafkaConfig = {
   eventsTopic: process.env.KAFKA_EVENTS_TOPIC ?? 'ai-platform-events',
   commandsTopic: process.env.KAFKA_COMMANDS_TOPIC ?? 'ai-platform-commands',
   outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
-  domainChangesTopic:
-    process.env.KAFKA_DOMAIN_CHANGES_TOPIC ?? 'ai-platform-domain-changes',
+  domainChangesTopic: process.env.KAFKA_DOMAIN_CHANGES_TOPIC ?? 'ai-platform-domain-changes',
   deadLetterTopic: process.env.KAFKA_DEAD_LETTER_TOPIC ?? 'ai-platform-dead-letter',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-core',
   commandsGroupId: process.env.KAFKA_COMMANDS_GROUP_ID ?? 'ai-platform-server-core-commands',

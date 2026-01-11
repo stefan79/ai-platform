@@ -24,9 +24,7 @@ export type OutboxRecordOf<T extends OutboxEffectType> = OutboxRecordBase & {
   readonly payload: OutboxPayloadMap[T];
 };
 
-export type OutboxRecord =
-  | OutboxRecordOf<'kafka.echo'>
-  | OutboxRecordOf<'kafka.domain-change'>;
+export type OutboxRecord = OutboxRecordOf<'kafka.echo'> | OutboxRecordOf<'kafka.domain-change'>;
 
 const outboxPk = (id: string) => `OUTBOX#${id}`;
 const outboxSk = (createdAt: number) => `OUTBOX#${createdAt}`;

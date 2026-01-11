@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { Effect, pipe } from 'effect';
 import { parseCommandKafkaEnvelope, type CommandKafkaEnvelope } from '@ai-platform/protocol-core';
@@ -8,6 +8,8 @@ import { MessageReducedEvent } from '../domain/events';
 
 @Injectable()
 export class CommandProcessorService {
+  private readonly logger = new Logger(CommandProcessorService.name);
+
   constructor(
     private readonly reducerChain: ReducerChainService,
     private readonly outbox: OutboxService,
@@ -15,7 +17,7 @@ export class CommandProcessorService {
   ) {}
 
   async process(raw: unknown): Promise<void> {
-    console.log('Processing command:', JSON.stringify(raw));
+    this.logger.debug(`Processing command: ${JSON.stringify(raw)}`);
     const program = pipe(
       Effect.try({
         try: () => parseCommandKafkaEnvelope(raw),

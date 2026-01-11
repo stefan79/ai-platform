@@ -96,6 +96,36 @@ export const domainEventDefinitions = [
   { type: 'thread.metadata-updated', schema: threadMetadataUpdatedSchema },
 ] as const;
 
+const aggregateTypeSchema = z.enum(['server', 'user', 'thread']);
+
+const domainEventEnvelopeOptions = domainEventDefinitions.map((definition) =>
+  z
+    .object({
+      eventId: z.string(),
+      occurredAt: z.number().int().nonnegative(),
+      aggregateId: z.string(),
+      aggregateType: aggregateTypeSchema,
+      type: z.literal(definition.type),
+      payload: definition.schema,
+      version: z.number().int().nonnegative().optional(),
+    })
+    .strict(),
+);
+
+export const domainEventEnvelopeSchema = z.discriminatedUnion(
+  'type',
+  domainEventEnvelopeOptions as unknown as [
+    z.ZodDiscriminatedUnionOption<'type'>,
+    ...z.ZodDiscriminatedUnionOption<'type'>[],
+  ],
+);
+
+export type DomainEventEnvelopeSchema = z.infer<typeof domainEventEnvelopeSchema>;
+
+export function parseDomainEventEnvelope(payload: unknown): DomainEventEnvelopeSchema {
+  return domainEventEnvelopeSchema.parse(payload);
+}
+
 export class MessageReducedEvent implements IEvent {
   readonly id = randomUUID();
   constructor(public readonly record: DomainEventEnvelope) {}

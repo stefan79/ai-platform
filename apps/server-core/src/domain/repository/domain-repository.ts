@@ -8,8 +8,11 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { dynamoConfig } from '../../config';
 import type { DomainEventEnvelope, DomainAggregateType } from '../events';
+import { parseDomainEventEnvelope } from '../events';
 import type { OutboxRecord } from '../outbox';
+import { outboxRecordSchema } from '../outbox';
 import type { ServerSnapshot, UserSnapshot, ThreadSnapshot } from '../snapshots';
+import { snapshotSchema } from '../snapshots';
 
 export interface DomainRepository {
   loadServer(serverId: string): Promise<ServerSnapshot | null>;
@@ -63,6 +66,7 @@ const encodeCursor = (key?: Record<string, unknown>) =>
 const decodeCursor = (cursor?: string) =>
   cursor ? (JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as Record<string, unknown>) : undefined;
 
+//TODO: Why is the snapshot type inference needed here? Can this be simplified?
 const inferAggregate = (
   snapshot: ServerSnapshot | UserSnapshot | ThreadSnapshot,
 ): AggregateKey => {
@@ -82,6 +86,11 @@ export class DynamoDomainRepository implements DomainRepository {
       region: dynamoConfig.region,
       endpoint: dynamoConfig.endpoint,
     }),
+    {
+      marshallOptions: {
+        removeUndefinedValues: true,
+      },
+    },
   );
 
   async loadServer(serverId: string): Promise<ServerSnapshot | null> {
@@ -127,9 +136,11 @@ export class DynamoDomainRepository implements DomainRepository {
     const sortField = args.sort ?? 'updatedAt';
     const order = args.order ?? 'desc';
     const sorted = [...items].sort((left, right) => {
-      const leftValue = (left as Record<string, number>)[sortField] ?? 0;
-      const rightValue = (right as Record<string, number>)[sortField] ?? 0;
-      return order === 'asc' ? leftValue - rightValue : rightValue - leftValue;
+      const leftValue = (left as Record<string, unknown>)[sortField];
+      const rightValue = (right as Record<string, unknown>)[sortField];
+      const leftNumber = typeof leftValue === 'number' ? leftValue : 0;
+      const rightNumber = typeof rightValue === 'number' ? rightValue : 0;
+      return order === 'asc' ? leftNumber - rightNumber : rightNumber - leftNumber;
     });
 
     return {
@@ -190,8 +201,12 @@ export class DynamoDomainRepository implements DomainRepository {
       return;
     }
 
+    const validatedEvents = events.map((event) => parseDomainEventEnvelope(event));
+    const validatedSnapshots = snapshots.map((snapshot) => snapshotSchema.parse(snapshot));
+    const validatedOutbox = outbox.map((record) => outboxRecordSchema.parse(record));
+
     const TransactItems = [
-      ...events.map((event) => ({
+      ...validatedEvents.map((event) => ({
         Put: {
           TableName: dynamoConfig.domainTable,
           Item: {
@@ -208,7 +223,7 @@ export class DynamoDomainRepository implements DomainRepository {
           ConditionExpression: 'attribute_not_exists(pk)',
         },
       })),
-      ...snapshots.map((snapshot) => {
+      ...validatedSnapshots.map((snapshot) => {
         const aggregate = inferAggregate(snapshot);
         return {
           Put: {
@@ -223,7 +238,7 @@ export class DynamoDomainRepository implements DomainRepository {
           },
         };
       }),
-      ...outbox.map((record) => ({
+      ...validatedOutbox.map((record) => ({
         Put: {
           TableName: dynamoConfig.outboxTable,
           Item: record,
@@ -256,7 +271,11 @@ export class DynamoDomainRepository implements DomainRepository {
       }),
     );
 
-    const item = result.Items?.[0] as T | undefined;
-    return item ?? null;
+    const item = result.Items?.[0] as Record<string, unknown> | undefined;
+    if (!item) {
+      return null;
+    }
+    const { pk, sk, aggregateType, aggregateId, ...snapshot } = item;
+    return snapshot as T;
   }
 }

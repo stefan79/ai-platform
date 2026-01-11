@@ -40,10 +40,6 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
       z.infer<typeof this.userMessageBodySchema>
     >(envelope, 'command.save-user-message');
     const payload = command.payload;
-    const thread = await this.repository.loadThread(payload.threadId);
-    if (!thread) {
-      throw new Error('Thread not found');
-    }
     const authorId = context.userId ?? context.sessionId;
     const event = createDomainEventEnvelope({
       aggregateId: payload.threadId,
@@ -56,6 +52,10 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
         body: payload.body,
       },
     });
+    const thread = await this.repository.loadThread(payload.threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
     const nextThread = applyThreadEvent(thread, event);
     return {
       domainEvents: [event],

@@ -20,8 +20,7 @@ export class DynamoPersistenceService {
       new DeleteCommand({
         TableName: dynamoConfig.outboxTable,
         Key: {
-          pk: record.pk,
-          sk: record.sk,
+          id: record.id,
         },
       }),
     );

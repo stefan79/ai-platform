@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Effect } from 'effect';
 import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import type { OutboxRecord } from '../outbox';
@@ -24,6 +24,7 @@ const emptyReduction: ReductionResult = {
 @Injectable()
 export class ReducerChainService {
   private readonly reducers: Reducer[];
+  private readonly logger = new Logger(ReducerChainService.name);
 
   constructor(server: ServerReducer, user: UserReducer, thread: ThreadReducer) {
     this.reducers = [server, user, thread];
@@ -41,7 +42,9 @@ export class ReducerChainService {
             continue;
           }
 
-          console.log('Reducer', reducer.constructor.name, 'produced', reduction);
+          this.logger.debug(
+            `Reducer ${reducer.constructor.name} produced ${JSON.stringify(reduction)}`,
+          );
 
           result = {
             domainEvents: [...result.domainEvents, ...reduction.domainEvents],

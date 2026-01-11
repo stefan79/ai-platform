@@ -181,4 +181,5 @@ lines.push('');
 
 fs.mkdirSync(outputDir, { recursive: true });
 fs.writeFileSync(outputFile, lines.join('\n'), 'utf8');
-console.log(`Generated ${path.relative(workspaceRoot, outputFile)}`);
+// eslint-disable-next-line no-console
+console.debug(`Generated ${path.relative(workspaceRoot, outputFile)}`);

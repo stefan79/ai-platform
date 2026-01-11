@@ -1,12 +1,14 @@
 import 'reflect-metadata';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { kafkaConfig } from './config';
 
 async function bootstrap() {
-  console.log('Starting server-core microservice...');
-  console.log('Using Kafka Config:', kafkaConfig);
+  const logger = new Logger('server-core');
+  logger.debug('Starting server-core microservice...');
+  logger.debug(`Using Kafka Config: ${JSON.stringify(kafkaConfig)}`);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.KAFKA,
     options: {
@@ -28,7 +30,7 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  // eslint-disable-next-line no-console
-  console.error(error);
+  const logger = new Logger('server-core');
+  logger.error(error instanceof Error ? error.stack : String(error));
   process.exit(1);
 });

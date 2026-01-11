@@ -39,10 +39,6 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
       responseTo: string;
       threadId: string;
     }>(envelope, 'command.generate-assistant-response');
-    const thread = await this.repository.loadThread(command.payload.threadId);
-    if (!thread) {
-      throw new Error('Thread not found');
-    }
     const responseText = await this.context.assistantResponse.generate(command.payload.prompt);
     const message: z.infer<typeof assistantMessageSchema> = {
       messageId: randomUUID(),
@@ -76,6 +72,10 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
         body: message.body,
       },
     });
+    const thread = await this.repository.loadThread(command.payload.threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
     const nextThread = applyThreadEvent(thread, event);
 
     return {

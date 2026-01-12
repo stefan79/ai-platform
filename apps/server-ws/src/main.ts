@@ -16,7 +16,6 @@ export async function startServer() {
   return server;
 }
 
-<<<<<<< HEAD
 function registerShutdownSignals(app: NestFastifyApplication) {
   let shuttingDown = false;
   const shutdown = async (signal: string) => {

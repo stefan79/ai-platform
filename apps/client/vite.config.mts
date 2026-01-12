@@ -1,44 +1,47 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
-  root: __dirname,
+  root: currentDir,
   plugins: [react()],
   resolve: {
     extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
     alias: [
       {
         find: /^@ai-platform\/design-tokens\/styles\.css$/,
-        replacement: path.resolve(__dirname, '../../libs/design-tokens/src/styles.css'),
+        replacement: path.resolve(currentDir, '../../libs/design-tokens/src/styles.css'),
       },
       {
         find: /^@ai-platform\/design-tokens$/,
-        replacement: path.resolve(__dirname, '../../libs/design-tokens/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/design-tokens/src/index.ts'),
       },
       {
         find: /^@effect\/schema\/Schema$/,
-        replacement: path.resolve(__dirname, '../../libs/effect-schema/src/Schema.ts'),
+        replacement: path.resolve(currentDir, '../../libs/effect-schema/src/Schema.ts'),
       },
       {
         find: /^@effect\/schema$/,
-        replacement: path.resolve(__dirname, '../../libs/effect-schema/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/effect-schema/src/index.ts'),
       },
       {
         find: /^@ai-platform\/context-core$/,
-        replacement: path.resolve(__dirname, '../../libs/context-core/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/context-core/src/index.ts'),
       },
       {
         find: /^@ai-platform\/protocol-rest$/,
-        replacement: path.resolve(__dirname, '../../libs/protocol-rest/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/protocol-rest/src/index.ts'),
       },
       {
         find: /^@ai-platform\/protocol-ws$/,
-        replacement: path.resolve(__dirname, '../../libs/protocol-ws/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/protocol-ws/src/index.ts'),
       },
       {
         find: /^@ai-platform\/protocol-generated$/,
-        replacement: path.resolve(__dirname, '../../libs/protocol-generated/src/index.ts'),
+        replacement: path.resolve(currentDir, '../../libs/protocol-generated/src/index.ts'),
       },
     ],
   },
@@ -52,13 +55,13 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: path.resolve(__dirname, '../../dist/apps/client'),
+    outDir: path.resolve(currentDir, '../../dist/apps/client'),
     emptyOutDir: true,
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: path.resolve(__dirname, './src/test-setup.ts'),
+    setupFiles: path.resolve(currentDir, './src/test-setup.ts'),
     include: ['src/**/*.spec.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
   },
 });

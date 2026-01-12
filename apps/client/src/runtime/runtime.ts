@@ -1,4 +1,7 @@
-import { parseServerDetailsResponse } from '@ai-platform/protocol-rest';
+import {
+  parseServerDetailsResponse,
+  parseThreadMessagesResponse,
+} from '@ai-platform/protocol-rest';
 import { parseEventEnvelope } from '@ai-platform/protocol-generated';
 import { parseEventPayload } from '@ai-platform/protocol-generated';
 import { match } from 'ts-pattern';
@@ -100,6 +103,7 @@ export const createAppRuntime = (options: {
         .with('assistant.message', () => {
           const parsed = parseEventPayload('assistant.message', envelope.body);
           threadBus.publish({
+            kind: 'single',
             threadId: parsed.threadId,
             payloadType: 'assistant.message',
             payload: parsed,
@@ -108,6 +112,7 @@ export const createAppRuntime = (options: {
         .with('user.message', () => {
           const parsed = parseEventPayload('user.message', envelope.body);
           threadBus.publish({
+            kind: 'single',
             threadId: parsed.threadId,
             payloadType: 'user.message',
             payload: parsed,
@@ -186,7 +191,7 @@ export const createAppRuntime = (options: {
   const subscribeThreadBus = () => {
     unsubscribeBus?.();
     unsubscribeBus = threadBus.subscribe((event) => {
-      if (event.payloadType !== 'user.message') {
+      if (event.kind !== 'single' || event.payloadType !== 'user.message') {
         return;
       }
       if (!socket || !socket.connected) {
@@ -213,9 +218,39 @@ export const createAppRuntime = (options: {
     direction: 'client',
   });
 
+  const loadThreadHistory = async (): Promise<void> => {
+    const threadId = store.getState().ui.threadList.selectedThreadId;
+    if (!threadId) {
+      return;
+    }
+    const path = `/api/v1/users/${config.userId}/threads/${threadId}/messages?limit=50&direction=backward`;
+    const payload = await fetchJson(config.restBaseUrl, path);
+    const response = parseThreadMessagesResponse(payload);
+    const messages = response.items.map((item) => ({
+      id: item.messageId,
+      role: item.authorId === config.userId ? 'user' : 'assistant',
+      timestamp: item.timestamp,
+      body: item.body,
+      status: 'complete',
+      responseTo: undefined,
+      assistantId: item.authorId === config.userId ? undefined : item.authorId,
+      threadId: item.threadId,
+    }));
+    threadBus.publish({
+      kind: 'history',
+      threadId,
+      messages,
+    });
+  };
+
   const bootstrapAndEnable = async (): Promise<void> => {
     try {
       await bootstrap();
+      try {
+        await loadThreadHistory();
+      } catch (error) {
+        logger.warn({ error }, 'Failed to load thread history');
+      }
       dispatchStatus('connected');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Bootstrap failed';

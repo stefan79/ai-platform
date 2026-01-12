@@ -1,14 +1,48 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import type { ContextState } from '@ai-platform/context-core';
 import {
   createHealthResponse,
   createServerDetailsResponse,
+  createThreadMessagesResponse,
   createVersionResponse,
 } from '@ai-platform/protocol-rest';
 import { createLogger } from './logger';
 
+const dynamoConfig = {
+  region: process.env.AWS_REGION ?? 'us-east-1',
+  endpoint: process.env.DYNAMODB_ENDPOINT ?? 'http://localhost:8000',
+  domainTable: process.env.DYNAMODB_DOMAIN_TABLE ?? 'ai-platform-domain-events',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'local',
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? 'local',
+};
+
+const aggregatePk = (threadId: string) => `AGG#thread#${threadId}`;
+const encodeCursor = (key?: Record<string, unknown>) =>
+  key ? Buffer.from(JSON.stringify(key)).toString('base64') : undefined;
+const decodeCursor = (cursor?: string) =>
+  cursor
+    ? (JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as Record<string, unknown>)
+    : undefined;
+
 export function buildServer(contextState: ContextState) {
+  const dynamoClient = DynamoDBDocumentClient.from(
+    new DynamoDBClient({
+      region: dynamoConfig.region,
+      endpoint: dynamoConfig.endpoint,
+      credentials: {
+        accessKeyId: dynamoConfig.accessKeyId,
+        secretAccessKey: dynamoConfig.secretAccessKey,
+      },
+    }),
+    {
+      marshallOptions: {
+        removeUndefinedValues: true,
+      },
+    },
+  );
   const server = Fastify({
     logger: createLogger(),
   });
@@ -33,6 +67,71 @@ export function buildServer(contextState: ContextState) {
       name: 'Agent Platform',
       version: contextState.version,
       status: contextState.health.status,
+    });
+    return reply.send(payload);
+  });
+
+  server.get('/api/v1/users/:userId/threads/:threadId/messages', async (request, reply) => {
+    const { threadId } = request.params as { userId: string; threadId: string };
+    const query = request.query as Partial<{
+      limit: string;
+      cursor: string;
+      direction: 'forward' | 'backward';
+    }>;
+    const limit = Math.min(Number(query.limit ?? 50), 200);
+    const direction = query.direction ?? 'backward';
+    const scanForward = direction === 'forward';
+
+    const result = await dynamoClient.send(
+      new QueryCommand({
+        TableName: dynamoConfig.domainTable,
+        KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :skPrefix)',
+        ExpressionAttributeNames: {
+          '#pk': 'pk',
+          '#sk': 'sk',
+          '#type': 'type',
+        },
+        ExpressionAttributeValues: {
+          ':pk': aggregatePk(threadId),
+          ':skPrefix': 'EVENT#',
+          ':messageType': 'thread.message-added',
+        },
+        FilterExpression: '#type = :messageType',
+        Limit: Number.isFinite(limit) && limit > 0 ? limit : 50,
+        ScanIndexForward: scanForward,
+        ExclusiveStartKey: decodeCursor(query.cursor),
+      }),
+    );
+
+    const items = (result.Items ?? []) as Array<{
+      payload?: {
+        messageId: string;
+        authorId: string;
+        timestamp: number;
+        body: string;
+      };
+      aggregateId?: string;
+    }>;
+
+    const messages = items
+      .map((item) => {
+        if (!item.payload) {
+          return null;
+        }
+        return {
+          messageId: item.payload.messageId,
+          threadId,
+          authorId: item.payload.authorId,
+          timestamp: item.payload.timestamp,
+          body: item.payload.body,
+        };
+      })
+      .filter((message): message is NonNullable<typeof message> => Boolean(message));
+
+    const orderedMessages = scanForward ? messages : [...messages].reverse();
+    const payload = createThreadMessagesResponse({
+      items: orderedMessages,
+      cursor: encodeCursor(result.LastEvaluatedKey as Record<string, unknown> | undefined),
     });
     return reply.send(payload);
   });

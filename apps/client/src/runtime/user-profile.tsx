@@ -6,7 +6,7 @@ export type UserProfile = {
 };
 
 const defaultProfile: UserProfile = {
-  userId: 'ce9a8edc-e5b1-40bc-bd3a-910b000af55a',
+  userId: '6f9a2c1b-0c4d-4f8f-8b0a-1a2b3c4d5e6f',
 };
 
 const UserProfileContext = createContext<UserProfile>(defaultProfile);

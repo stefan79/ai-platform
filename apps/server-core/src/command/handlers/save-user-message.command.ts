@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { CommandKafkaEnvelope } from '@ai-platform/protocol-core';
 import { z } from 'zod';
-import { createDomainEventRecord } from '../../domain/events';
+import { createDomainEventEnvelope } from '../../domain/events';
+import { applyThreadEvent } from '../../domain/snapshots';
 import type { CommandHandler } from './command-handler';
 import type { ReduceContext } from '../../domain/reducers/reducer.types';
 import type { ReductionResult } from '../../domain/reducers/reducer-chain.service';
 import type { ServerContext } from '../../domain/server-context';
+import { DynamoDomainRepository } from '../../domain/repository/domain-repository';
 
 @Injectable()
 export class SaveUserMessageCommandHandler implements CommandHandler {
@@ -19,6 +21,8 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
     })
     .strict();
 
+  constructor(private readonly repository: DynamoDomainRepository) {}
+
   register(context: ServerContext): void {
     this.context = context;
     context.commandSchemaRegistry.register('command.save-user-message', this.userMessageBodySchema);
@@ -28,7 +32,7 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
     });
   }
 
-  reduce(envelope: CommandKafkaEnvelope, context: ReduceContext): ReductionResult {
+  async reduce(envelope: CommandKafkaEnvelope, context: ReduceContext): Promise<ReductionResult> {
     if (!this.context) {
       throw new Error('ServerContext not registered for save user message handler');
     }
@@ -36,8 +40,26 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
       z.infer<typeof this.userMessageBodySchema>
     >(envelope, 'command.save-user-message');
     const payload = command.payload;
+    const authorId = context.userId ?? context.sessionId;
+    const event = createDomainEventEnvelope({
+      aggregateId: payload.threadId,
+      aggregateType: 'thread',
+      type: 'thread.message-added',
+      payload: {
+        messageId: payload.messageId,
+        authorId,
+        timestamp: payload.timestamp,
+        body: payload.body,
+      },
+    });
+    const thread = await this.repository.loadThread(payload.threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+    const nextThread = applyThreadEvent(thread, event);
     return {
-      domainEvents: [createDomainEventRecord(context.userId ?? context.sessionId, 'user', payload)],
+      domainEvents: [event],
+      snapshots: [nextThread],
       outboxRecords: [],
     };
   }

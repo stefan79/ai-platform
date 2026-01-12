@@ -1,5 +1,6 @@
 import { createContextState, readWorkspaceVersion } from '@ai-platform/context-core';
 import { buildServer } from './server';
+import { createLogger } from './logger';
 
 export async function startServer() {
   const version = readWorkspaceVersion();
@@ -19,8 +20,8 @@ export async function startServer() {
 
 if (require.main === module) {
   startServer().catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    const logger = createLogger();
+    logger.error(error);
     process.exit(1);
   });
 }

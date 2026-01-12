@@ -2,6 +2,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { ClientKafka } from '@nestjs/microservices';
 import { kafkaConfig } from '../config';
 import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import type { DomainChangeEnvelope } from '../domain/domain-change';
 
 @Injectable()
 export class EventKafkaProducer implements OnModuleInit, OnModuleDestroy {
@@ -17,6 +18,10 @@ export class EventKafkaProducer implements OnModuleInit, OnModuleDestroy {
 
   publish(message: EventKafkaEnvelope, key?: string) {
     return this.client.emit(message.topic, key ? { key, value: message } : message);
+  }
+
+  publishDomainChange(message: DomainChangeEnvelope, topic: string, key?: string) {
+    return this.client.emit(topic, key ? { key, value: message } : message);
   }
 
   publishDeadLetter(payload: unknown, reason: string) {

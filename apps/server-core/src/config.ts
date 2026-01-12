@@ -9,7 +9,9 @@ export const kafkaConfig = {
   outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
   deadLetterTopic: process.env.KAFKA_DEAD_LETTER_TOPIC ?? 'ai-platform-dead-letter',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-core',
+  groupInstanceId: process.env.KAFKA_GROUP_INSTANCE_ID,
   commandsGroupId: process.env.KAFKA_COMMANDS_GROUP_ID ?? 'ai-platform-server-core-commands',
+  commandsGroupInstanceId: process.env.KAFKA_COMMANDS_GROUP_INSTANCE_ID,
 };
 
 export const dynamoConfig = {

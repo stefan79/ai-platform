@@ -8,13 +8,13 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/apps/client"],
       "options": {
-        "command": "pnpm exec vite build --config apps/client/vite.config.ts"
+        "command": "pnpm exec vite build --config apps/client/vite.config.mts"
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec vite dev --config apps/client/vite.config.ts --host"
+        "command": "pnpm exec vite dev --config apps/client/vite.config.mts --host"
       }
     },
     "lint": {
@@ -26,7 +26,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec vitest run --config apps/client/vite.config.ts"
+        "command": "pnpm exec vitest run --config apps/client/vite.config.mts"
       }
     }
   }

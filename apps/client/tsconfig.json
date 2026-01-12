@@ -4,6 +4,6 @@
     "types": ["vite/client", "node"],
     "allowJs": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.mts", "vitest.config.ts"],
   "exclude": ["dist", "tmp", "node_modules"]
 }

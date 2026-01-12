@@ -18,6 +18,7 @@ import { AssistantResponseService } from './command/assistant-response.service';
 import { CommandKafkaProducer } from './command/command-kafka.producer';
 import { SaveUserMessageCommandHandler } from './command/handlers/save-user-message.command';
 import { ReplyWithAssistantMessageCommandHandler } from './command/handlers/reply-with-assistant-message.command';
+import { DynamoDomainRepository } from './domain/repository/domain-repository';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ReplyWithAssistantMessageCommandHandler } from './command/handlers/repl
     UserReducer,
     ThreadReducer,
     DynamoPersistenceService,
+    DynamoDomainRepository,
     OutboxService,
     UserMessageStrategy,
   ],

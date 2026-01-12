@@ -3,17 +3,20 @@ import { randomUUID } from 'crypto';
 import type { CommandKafkaEnvelope, EventKafkaEnvelope } from '@ai-platform/protocol-core';
 import { z } from 'zod';
 import { kafkaConfig } from '../../config';
-import { createDomainEventRecord } from '../../domain/events';
+import { createDomainEventEnvelope } from '../../domain/events';
 import { createOutboxRecord } from '../../domain/outbox';
+import { applyThreadEvent } from '../../domain/snapshots';
 import { assistantMessageSchema } from '../../event/strategies/user-message.strategy';
 import type { CommandHandler } from './command-handler';
 import type { ReduceContext } from '../../domain/reducers/reducer.types';
 import type { ReductionResult } from '../../domain/reducers/reducer-chain.service';
 import type { ServerContext } from '../../domain/server-context';
+import { DynamoDomainRepository } from '../../domain/repository/domain-repository';
 
 @Injectable()
 export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
   private context?: ServerContext;
+  constructor(private readonly repository: DynamoDomainRepository) {}
 
   register(context: ServerContext): void {
     this.context = context;
@@ -58,9 +61,26 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
       partition: 0,
       offset: 0,
     };
+    const event = createDomainEventEnvelope({
+      aggregateId: command.payload.threadId,
+      aggregateType: 'thread',
+      type: 'thread.message-added',
+      payload: {
+        messageId: message.messageId,
+        authorId: message.assistantId,
+        timestamp: message.timestamp,
+        body: message.body,
+      },
+    });
+    const thread = await this.repository.loadThread(command.payload.threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+    const nextThread = applyThreadEvent(thread, event);
 
     return {
-      domainEvents: [createDomainEventRecord(context.userId ?? context.sessionId, 'user', message)],
+      domainEvents: [event],
+      snapshots: [nextThread],
       outboxRecords: [createOutboxRecord('kafka.echo', outgoingEnvelope)],
     };
   }

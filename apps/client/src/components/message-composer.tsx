@@ -1,62 +1,31 @@
 import { useState } from 'react';
-import { uiModels } from '../models';
-import { Panel } from './panel';
-import { useAppSelector } from '../runtime';
-import { useThreadBus } from '../runtime';
+import { useAppSelector, useThreadBus } from '../runtime';
+import { cn } from '../lib/utils';
 
 /**
  * Component: MessageComposer
  *
  * Purpose:
- * - Present the message composition surface, draft metadata, and command affordances.
+ * - Present the message composition surface for user input.
  *
  * Visuals:
- * - Layout: full-width composer surface with a footer action row.
+ * - Layout: full-width composer with textarea and submit button.
  * - Density: comfortable.
- * - Color/Type: seamless text area on the same surface with an accent submit button.
- * - States: empty draft, focused/blurred input, submitting flag.
- *
- * Responsive + Scrolling:
- * - Breakpoints: layout remains single column; actions stay right-aligned.
- * - Scrolling: none; content grows vertically.
- * - Height: fit content.
- *
- * Model Setup:
- * - Inputs: message composer + input state.
- * - Defaults: uses mocked UI model defaults for now.
- * - Derived: draft length from state.
- *
- * Events + Commands:
- * - Events In: ComposerDraftChanged, ComposerSubmitted, ComposerCleared,
- *   ComposerInputChanged, ComposerInputFocused, ComposerInputBlurred.
- * - Commands Out: thread bus `user.message` payloads.
- * - Reducers: none.
- * - Side Effects: none.
- *
- * Accessibility:
- * - Keyboard: none (static).
- * - ARIA: panel uses aria-label via wrapper.
- *
- * Notes:
- * - Mock-only; wire to runtime state and commands later.
- *
- * TODO:
- * - Swap mocked state for runtime selectors.
- * - Add keyboard submit + focus handling.
+ * - Color/Type: seamless textarea with accent submit button.
+ * - States: empty draft, focused/blurred input, submitting/locked state.
  */
 export function MessageComposer() {
-  const input = uiModels.composerInput.defaultState;
   const threadId = useAppSelector((state) => state.ui.threadList.selectedThreadId);
   const composerLocked = useAppSelector((state) => state.composerLocked);
   const threadBus = useThreadBus();
-  const [draft, setDraft] = useState(input.draftText);
+  const [draft, setDraft] = useState('');
 
   const submitMessage = () => {
     const trimmed = draft.trim();
-    if (!trimmed) {
-      return;
-    }
+    if (!trimmed) return;
+
     threadBus.publish({
+      kind: 'single',
       threadId,
       payloadType: 'user.message',
       payload: {
@@ -69,49 +38,43 @@ export function MessageComposer() {
     setDraft('');
   };
 
-  const placeholder = composerLocked
-    ? 'Waiting for assistant response...'
-    : 'Message Agent Platform...';
-
-  const onSubmit = () => {
-    if (composerLocked) {
-      return;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !composerLocked) {
+      e.preventDefault();
+      submitMessage();
     }
-    submitMessage();
   };
 
+  const placeholder = composerLocked ? 'Waiting for response...' : 'Message Agent Platform...';
+
   return (
-    <Panel
-      title="MessageComposer"
-      subtitle="Main Pane"
-      events={[...uiModels.messageComposer.events, ...uiModels.composerInput.events]}
-      ariaLabel="Message composer"
-      mockId="mock.message-composer"
-    >
-      <div className="message-composer__surface">
-        <div className="message-composer__input-shell">
-          <textarea
-            className="message-composer__input"
-            placeholder={placeholder}
-            rows={4}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            aria-label="Message input"
-            readOnly={composerLocked}
-          />
-        </div>
-        <div className="message-composer__actions">
-          <button
-            className="message-composer__submit"
-            type="button"
-            aria-label="Submit message"
-            onClick={onSubmit}
-            disabled={composerLocked}
-          >
-            ↑
-          </button>
-        </div>
+    <div className="message-composer__surface">
+      <div className="message-composer__input-shell">
+        <textarea
+          className="message-composer__input"
+          placeholder={placeholder}
+          rows={4}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={composerLocked}
+          aria-label="Message input"
+        />
       </div>
-    </Panel>
+      <div className="message-composer__actions">
+        <button
+          className={cn(
+            'message-composer__submit',
+            (composerLocked || !draft.trim()) && 'opacity-50 cursor-not-allowed',
+          )}
+          type="button"
+          onClick={submitMessage}
+          disabled={composerLocked || !draft.trim()}
+          aria-label="Send message"
+        >
+          ↑
+        </button>
+      </div>
+    </div>
   );
 }

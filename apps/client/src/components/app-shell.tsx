@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import type { AppShellState } from '../models';
-import { logoSvg } from '@ai-platform/design-tokens';
 
 /**
  * Component: AppShell
@@ -48,22 +47,10 @@ export type AppShellProps = {
   shell: AppShellState;
 };
 
-export function AppShell({ children, shell }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   return (
-    <section
-      className="app-shell rounded-xl border border-border bg-card/90 shadow-lg"
-      aria-label="App shell"
-      data-mock-id="mock.app-shell"
-    >
-      <header className="app-shell__header flex items-center justify-start gap-4 border-b border-border px-8 py-5">
-        <span
-          className="logo inline-flex h-10 w-10"
-          aria-hidden="true"
-          dangerouslySetInnerHTML={{ __html: logoSvg }}
-        />
-        <h1 className="text-3xl font-semibold tracking-tight">{shell.title}</h1>
-      </header>
-      <div className="app-shell__body space-y-6 p-6">{children}</div>
+    <section className="app-shell flex h-full flex-col overflow-hidden" aria-label="App shell">
+      <div className="app-shell__body flex-1 overflow-hidden">{children}</div>
     </section>
   );
 }

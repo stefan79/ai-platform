@@ -1,12 +1,14 @@
 import 'reflect-metadata';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { KafkaOptions, MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { kafkaConfig } from './config';
 
 async function bootstrap() {
-  console.log('Starting server-core microservice...');
-  console.log('Using Kafka Config:', kafkaConfig);
+  const logger = new Logger('server-core');
+  logger.debug('Starting server-core microservice...');
+  logger.debug(`Using Kafka Config: ${JSON.stringify(kafkaConfig)}`);
   const consumerConfig = {
     groupId: kafkaConfig.groupId,
     ...(kafkaConfig.groupInstanceId ? { groupInstanceId: kafkaConfig.groupInstanceId } : {}),
@@ -32,20 +34,18 @@ async function bootstrap() {
 
 function registerShutdownSignals(app: { close: () => Promise<void> }) {
   let shuttingDown = false;
+  const logger = new Logger('server-core');
   const shutdown = async (signal: string) => {
     if (shuttingDown) {
       return;
     }
     shuttingDown = true;
-    // eslint-disable-next-line no-console
-    console.log(`server-core received ${signal}, shutting down...`);
+    logger.log(`server-core received ${signal}, shutting down...`);
     try {
       await app.close();
-      // eslint-disable-next-line no-console
-      console.log('server-core shutdown complete.');
+      logger.log('server-core shutdown complete.');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('server-core shutdown failed.', error);
+      logger.error('server-core shutdown failed.', error as Error);
       process.exitCode = 1;
     } finally {
       process.exit();
@@ -61,7 +61,7 @@ bootstrap()
     registerShutdownSignals(app);
   })
   .catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    const logger = new Logger('server-core');
+    logger.error(error instanceof Error ? error.stack : String(error));
     process.exit(1);
   });

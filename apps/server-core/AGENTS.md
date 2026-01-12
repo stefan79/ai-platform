@@ -24,6 +24,10 @@ Owns server-side event handling, command routing, and the canonical event schema
 - Conventions:
   - Each strategy file exports `eventDefinitions` with `{ type, schema }`.
   - Schemas are registered in `register()` via `eventDefinitions`.
+- Domain events:
+  - Domain event schemas are fixed and should be kept explicit in server-core.
+  - Domain event outbox effects (domain-change topic) are written in the same DynamoDB transaction.
+  - Domain events are intentionally separate from command and external event schemas.
 - File layout: `apps/server-core/src/event/strategies/*.strategy.ts`
 - Commands:
   - Generate client-safe schemas: `pnpx nx run protocol-generated:generate --output-style=stream`

@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -22,6 +22,7 @@ import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
 })
 export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly sessions = new Map<string, Socket>();
+  private readonly logger = new Logger(WsGateway.name);
 
   constructor(@Inject(KafkaProducerService) private readonly kafka: KafkaProducerService) {}
 
@@ -55,7 +56,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: unknown, @ConnectedSocket() socket: Socket) {
-    console.log('Received WS message:', payload);
+    this.logger.debug(`Received WS message: ${JSON.stringify(payload)}`);
 
     try {
       const sessionId = socket.data.sessionId as string | undefined;
@@ -69,9 +70,9 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new Error('Missing userId query');
       }
 
-      console.log('Parsing WS envelope');
+      this.logger.debug('Parsing WS envelope');
       const envelope: WsEnvelope = parseWsEnvelope(payload);
-      console.log('Envelope parsed:', envelope);
+      this.logger.debug(`Envelope parsed: ${JSON.stringify(envelope)}`);
 
       const kafkaEnvelope: EventKafkaEnvelope = {
         id: envelope.id,
@@ -93,12 +94,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           : undefined;
       const key = threadId ?? sessionId;
       await this.kafka.publish(kafkaEnvelope, key);
-      console.log('Published to Kafka:', kafkaEnvelope);
+      this.logger.debug(`Published to Kafka: ${JSON.stringify(kafkaEnvelope)}`);
 
       return { status: 'ok' };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Failed to handle WS message:', error);
+      this.logger.error(
+        'Failed to handle WS message',
+        error instanceof Error ? error.stack : String(error),
+      );
       socket.emit('message.error', { status: 'error', message });
       return { status: 'error', message };
     }

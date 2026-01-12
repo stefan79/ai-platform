@@ -1,7 +1,10 @@
 import 'reflect-metadata';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
+
+const logger = new Logger('server-ws');
 
 export async function startServer() {
   const server = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
@@ -9,11 +12,11 @@ export async function startServer() {
   const host = process.env.WS_HOST ?? process.env.HOST ?? '0.0.0.0';
 
   await server.listen(port, host);
-  // eslint-disable-next-line no-console
-  console.log(`server-ws listening at http://${host}:${port}`);
+  logger.debug(`server-ws listening at http://${host}:${port}`);
   return server;
 }
 
+<<<<<<< HEAD
 function registerShutdownSignals(app: NestFastifyApplication) {
   let shuttingDown = false;
   const shutdown = async (signal: string) => {
@@ -21,15 +24,12 @@ function registerShutdownSignals(app: NestFastifyApplication) {
       return;
     }
     shuttingDown = true;
-    // eslint-disable-next-line no-console
-    console.log(`server-ws received ${signal}, shutting down...`);
+    logger.log(`server-ws received ${signal}, shutting down...`);
     try {
       await app.close();
-      // eslint-disable-next-line no-console
-      console.log('server-ws shutdown complete.');
+      logger.log('server-ws shutdown complete.');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('server-ws shutdown failed.', error);
+      logger.error('server-ws shutdown failed.', error as Error);
       process.exitCode = 1;
     } finally {
       process.exit();
@@ -46,8 +46,7 @@ if (require.main === module) {
       registerShutdownSignals(server);
     })
     .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.error(error instanceof Error ? error.stack : String(error));
       process.exit(1);
     });
 }

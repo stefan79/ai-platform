@@ -98,11 +98,24 @@ export type ThreadMessage = {
 
 export type EventEnvelope = RawEventEnvelope;
 
-export type ThreadEvent<T extends EventType = EventType> = {
-  threadId: string;
-  payloadType: T;
-  payload: EventPayloadMap[T];
-};
+export type ThreadEvent<T extends EventType = EventType> =
+  | {
+      kind: 'single';
+      threadId: string;
+      payloadType: T;
+      payload: EventPayloadMap[T];
+    }
+  | {
+      kind: 'batch';
+      threadId: string;
+      payloadType: T;
+      payloads: EventPayloadMap[T][];
+    }
+  | {
+      kind: 'history';
+      threadId: string;
+      messages: ThreadMessage[];
+    };
 
 export type UiStatePatchPayload =
   | {

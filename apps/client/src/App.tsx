@@ -1,31 +1,13 @@
+import { useState } from 'react';
 import { uiModels } from './models';
 import { Badge } from './components/ui/badge';
 import { Button } from './components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { AppShell } from './components/app-shell';
 import { useAppShellState } from './runtime';
-import { Panel } from './components/panel';
 import { MessageComposer } from './components/message-composer';
 import { MessageTimeline } from './components/message-timeline';
-
-function SidebarToggle({ isCollapsed, isEnabled }: { isCollapsed: boolean; isEnabled: boolean }) {
-  return (
-    <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-      <div className="space-y-1">
-        <p className="text-sm font-medium">Sidebar Toggle</p>
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          ID: mock.sidebar-toggle
-        </p>
-        <p className="text-xs text-muted-foreground">
-          State: {isCollapsed ? 'Collapsed' : 'Expanded'} • {isEnabled ? 'Enabled' : 'Disabled'}
-        </p>
-      </div>
-      <span className="rounded-full bg-border px-3 py-1 text-xs uppercase tracking-wide text-muted-foreground">
-        Static
-      </span>
-    </div>
-  );
-}
+import { logoSvg } from '@ai-platform/design-tokens';
+import { cn } from './lib/utils';
 
 function ThreadListItem({
   title,
@@ -37,360 +19,302 @@ function ThreadListItem({
   isSelected: boolean;
 }) {
   return (
-    <div
-      className={`flex items-center justify-between rounded-md border px-3 py-2 ${isSelected ? 'border-primary/60 bg-primary/10' : 'border-border bg-background/40'}`}
+    <button
+      className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors ${
+        isSelected
+          ? 'bg-primary/15 border border-primary/30'
+          : 'hover:bg-muted/50 border border-transparent'
+      }`}
     >
-      <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">
-          {isSelected ? 'Selected thread' : 'Available thread'}
-        </p>
-      </div>
-      <span className="rounded-full bg-border px-2 py-1 text-xs text-muted-foreground">
-        {unreadCount} unread
-      </span>
-    </div>
+      <p className={`font-medium ${isSelected ? 'text-foreground' : 'text-foreground/80'}`}>
+        {title}
+      </p>
+      {unreadCount > 0 && (
+        <span className="mt-1 inline-flex items-center rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
+          {unreadCount} new
+        </span>
+      )}
+    </button>
   );
 }
 
 function ThreadList() {
-  const list = uiModels.threadList.defaultState;
   const items = uiModels.threadItems.map((model) => model.defaultState);
   return (
-    <Panel
-      title="ThreadList"
-      subtitle="Sidebar"
-      events={uiModels.threadList.events}
-      ariaLabel="Thread list"
-      mockId="mock.thread-list"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Filter: &quot;{list.filter || 'none'}&quot;</span>
-        <span>Selected: {list.selectedThreadId}</span>
-      </div>
-      <div className="space-y-2">
-        {items.map((item) => (
-          <ThreadListItem
-            key={item.threadId}
-            title={item.title}
-            unreadCount={item.unreadCount}
-            isSelected={item.isSelected}
-          />
-        ))}
-      </div>
-    </Panel>
+    <div className="space-y-1" aria-label="Thread list">
+      {items.map((item) => (
+        <ThreadListItem
+          key={item.threadId}
+          title={item.title}
+          unreadCount={item.unreadCount}
+          isSelected={item.isSelected}
+        />
+      ))}
+    </div>
   );
 }
 
-function ActorPanel() {
+function ActorList() {
   const state = uiModels.actorPanel.defaultState;
   return (
-    <Panel
-      title="ActorPanel"
-      subtitle="Sidebar"
-      events={uiModels.actorPanel.events}
-      ariaLabel="Actor panel"
-      mockId="mock.actor-panel"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Selected actor: {state.selectedActorId}</span>
-        <span>{state.isEditable ? 'Editable' : 'Read only'}</span>
-      </div>
-      <ul className="space-y-2">
-        {state.actors.map((actor) => (
-          <li
-            key={actor.id}
-            className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-          >
-            <div>
-              <p className="font-medium">{actor.name}</p>
-              <p className="text-xs text-muted-foreground">Role: {actor.role}</p>
-            </div>
-            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted-foreground">
-              {actor.id}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
+    <ul className="space-y-1" aria-label="Actor list">
+      {state.actors.map((actor) => (
+        <li
+          key={actor.id}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              actor.role === 'system'
+                ? 'bg-yellow-500'
+                : actor.role === 'assistant'
+                  ? 'bg-green-500'
+                  : 'bg-blue-500'
+            }`}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{actor.name}</p>
+            <p className="text-xs text-muted-foreground capitalize">{actor.role}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function FilePanel() {
+function FileList() {
   const state = uiModels.filePanel.defaultState;
   return (
-    <Panel
-      title="FilePanel"
-      subtitle="Sidebar"
-      events={uiModels.filePanel.events}
-      ariaLabel="File panel"
-      mockId="mock.file-panel"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Selected file: {state.selectedFileId}</span>
-        <span>{state.isEditable ? 'Editable' : 'Read only'}</span>
-      </div>
-      <ul className="space-y-2">
-        {state.files.map((file) => (
-          <li
-            key={file.id}
-            className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-          >
-            <div>
-              <p className="font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">Status: {file.status}</p>
-            </div>
-            <span className="rounded-full bg-border px-2 py-1 text-xs uppercase text-muted-foreground">
-              {file.id}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
+    <ul className="space-y-1" aria-label="File list">
+      {state.files.map((file) => (
+        <li
+          key={file.id}
+          className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors"
+        >
+          <p className="font-medium truncate">{file.name}</p>
+          <Badge variant={file.status === 'synced' ? 'default' : 'secondary'} className="text-xs">
+            {file.status}
+          </Badge>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function SettingsPanel() {
+function SettingsList() {
   const state = uiModels.settingsPanel.defaultState;
   return (
-    <Panel
-      title="SettingsPanel"
-      subtitle="Sidebar"
-      events={uiModels.settingsPanel.events}
-      ariaLabel="Settings panel"
-      mockId="mock.settings-panel"
-    >
-      <dl className="space-y-2 text-sm">
-        <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-          <dt className="text-muted-foreground">Theme</dt>
-          <dd className="font-medium">{state.settings.theme}</dd>
-        </div>
-        <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-          <dt className="text-muted-foreground">Density</dt>
-          <dd className="font-medium">{state.settings.density}</dd>
-        </div>
-        <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-          <dt className="text-muted-foreground">Sound</dt>
-          <dd className="font-medium">{state.settings.sound ? 'Enabled' : 'Disabled'}</dd>
-        </div>
-      </dl>
-      <p className="text-xs text-muted-foreground">
-        Dirty keys: {state.dirtyKeys.length ? state.dirtyKeys.join(', ') : 'none'} •{' '}
-        {state.isEditable ? 'Editable' : 'Read only'}
-      </p>
-    </Panel>
+    <dl className="space-y-1 text-sm" aria-label="Settings list">
+      <div className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors">
+        <dt className="text-muted-foreground">Theme</dt>
+        <dd className="font-medium capitalize">{state.settings.theme}</dd>
+      </div>
+      <div className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors">
+        <dt className="text-muted-foreground">Density</dt>
+        <dd className="font-medium capitalize">{state.settings.density}</dd>
+      </div>
+      <div className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors">
+        <dt className="text-muted-foreground">Sound</dt>
+        <dd className="font-medium">{state.settings.sound ? 'On' : 'Off'}</dd>
+      </div>
+    </dl>
   );
 }
 
 function SystemStateBar() {
   const state = uiModels.systemStateBar.defaultState;
   return (
-    <Panel
-      title="SystemStateBar"
-      subtitle="Main Pane"
-      events={uiModels.systemStateBar.events}
-      layout="row"
-      ariaLabel="System state bar"
-      mockId="mock.system-state-bar"
-    >
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <Badge variant="accent" className="uppercase">
-          Status: {state.systemStatus}
-        </Badge>
-        <Badge variant="default" className="text-[11px] normal-case">
-          Labels: {state.labels.join(' • ')}
-        </Badge>
-        <span className="text-xs text-muted-foreground">Last updated: {state.lastUpdatedAt}</span>
-      </div>
-    </Panel>
+    <div className="flex items-center gap-3 px-1">
+      <Badge
+        variant={state.systemStatus === 'ok' ? 'default' : 'destructive'}
+        className="uppercase text-xs"
+      >
+        {state.systemStatus}
+      </Badge>
+      <span className="text-xs text-muted-foreground">{state.labels.join(' • ')}</span>
+    </div>
   );
 }
 
 function ThreadHeader() {
-  const header = uiModels.threadHeader.defaultState;
   const title = uiModels.threadTitle.defaultState;
   const actions = uiModels.threadActions.defaultState;
   return (
-    <Panel
-      title="ThreadHeader"
-      subtitle="Main Pane"
-      events={[
-        ...uiModels.threadHeader.events,
-        ...uiModels.threadTitle.events,
-        ...uiModels.threadActions.events,
-      ]}
-      ariaLabel="Thread header"
-      mockId="mock.thread-header"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">ThreadTitle</p>
-          <p className="text-xl font-semibold">{title.title}</p>
-          <p className="text-xs text-muted-foreground">
-            Editable: {title.isEditable ? 'yes' : 'no'} • Thread ID: {title.threadId}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {actions.availableActions.map((action) => (
-            <Button key={action} variant="outline" size="sm">
-              {action}
-            </Button>
-          ))}
-          <Badge variant="default" className="text-[11px] normal-case">
-            Last: {actions.lastInvokedAction}
-          </Badge>
-        </div>
+    <div className="flex items-center justify-between gap-4 pb-4 border-b border-border">
+      <div>
+        <h2 className="text-xl font-semibold">{title.title}</h2>
       </div>
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>
-          ThreadHeader: {header.title} ({header.threadId})
-        </span>
-        <span>Status: {header.status}</span>
-      </div>
-    </Panel>
-  );
-}
-
-function ThreadOverviewDrawer() {
-  const drawer = uiModels.threadOverviewDrawer.defaultState;
-  return (
-    <Panel
-      title="ThreadOverviewDrawer"
-      subtitle="Main Pane"
-      events={uiModels.threadOverviewDrawer.events}
-      ariaLabel="Thread overview drawer"
-      mockId="mock.thread-overview-drawer"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Thread: {drawer.threadId}</span>
-        <span>Open: {drawer.isOpen ? 'Yes' : 'No'}</span>
-      </div>
-      <Tabs defaultValue={drawer.activeSectionId} className="w-full">
-        <TabsList className="flex flex-wrap">
-          {drawer.sections.map((section) => (
-            <TabsTrigger key={section} value={section}>
-              {section}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        {drawer.sections.map((section) => (
-          <TabsContent key={section} value={section} className="text-sm text-muted-foreground">
-            {section === drawer.activeSectionId
-              ? `Active section: ${section}`
-              : `Section: ${section}`}
-          </TabsContent>
+      <div className="flex items-center gap-2">
+        {actions.availableActions.map((action) => (
+          <Button key={action} variant="ghost" size="sm" className="capitalize">
+            {action}
+          </Button>
         ))}
-      </Tabs>
-    </Panel>
+      </div>
+    </div>
   );
 }
 
-function Sidebar() {
-  const sidebar = uiModels.sidebar.defaultState;
-  const toggle = uiModels.sidebarToggle.defaultState;
+function SidebarSection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <aside className="sidebar space-y-4" aria-label="Sidebar">
-      <div className="panel rounded-lg border border-border bg-card/80 px-4 py-3">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">Sidebar</p>
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          ID: mock.sidebar
-        </p>
-        <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-          <span>Collapsed: {sidebar.isCollapsed ? 'Yes' : 'No'}</span>
-          <span>Active panel: {sidebar.activePanel}</span>
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        <span className="text-muted-foreground">{icon}</span>
+        <h3 className="text-sm font-bold text-foreground">{title}</h3>
+        <div className="h-px flex-1 bg-border/50" />
+      </div>
+      <div className="pl-1">{children}</div>
+    </div>
+  );
+}
+
+const ThreadsIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+    />
+  </svg>
+);
+
+const ActorsIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+  </svg>
+);
+
+const FilesIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+    />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
+
+function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean; onToggle: () => void }) {
+  const shell = useAppShellState();
+  return (
+    <aside
+      className={cn(
+        'sidebar flex flex-col rounded-xl border border-border bg-card/80 shadow-lg overflow-hidden transition-all duration-300',
+        isCollapsed ? 'w-16' : 'w-full',
+      )}
+      aria-label="Sidebar"
+    >
+      <div className="flex-none flex items-center gap-3 px-3 py-4">
+        <button
+          onClick={onToggle}
+          className="logo inline-flex h-8 w-8 flex-shrink-0 hover:opacity-80 transition-opacity"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          dangerouslySetInnerHTML={{ __html: logoSvg }}
+        />
+        {!isCollapsed && (
+          <h1 className="text-xl font-semibold tracking-tight truncate">{shell.title}</h1>
+        )}
+      </div>
+      {!isCollapsed && (
+        <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-5">
+          <SidebarSection title="Threads" icon={<ThreadsIcon />}>
+            <ThreadList />
+          </SidebarSection>
+          <SidebarSection title="Actors" icon={<ActorsIcon />}>
+            <ActorList />
+          </SidebarSection>
+          <SidebarSection title="Files" icon={<FilesIcon />}>
+            <FileList />
+          </SidebarSection>
+          <SidebarSection title="Settings" icon={<SettingsIcon />}>
+            <SettingsList />
+          </SidebarSection>
         </div>
-      </div>
-      <Panel
-        title="Sidebar Toggle"
-        subtitle="Sidebar"
-        events={uiModels.sidebarToggle.events}
-        mockId="mock.sidebar-toggle-panel"
-      >
-        <SidebarToggle isCollapsed={toggle.isCollapsed} isEnabled={toggle.isEnabled} />
-      </Panel>
-      <ThreadList />
-      <ActorPanel />
-      <FilePanel />
-      <SettingsPanel />
+      )}
+      {isCollapsed && (
+        <div className="flex-1 flex flex-col items-center gap-4 py-4">
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Threads"
+            title="Threads"
+          >
+            <ThreadsIcon />
+          </button>
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Actors"
+            title="Actors"
+          >
+            <ActorsIcon />
+          </button>
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Files"
+            title="Files"
+          >
+            <FilesIcon />
+          </button>
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Settings"
+            title="Settings"
+          >
+            <SettingsIcon />
+          </button>
+        </div>
+      )}
     </aside>
-  );
-}
-
-function MessageDetailsPanel() {
-  const panel = uiModels.messageDetailsPanel.defaultState;
-  return (
-    <Panel
-      title="MessageDetailsPanel"
-      subtitle="Additional Panel"
-      events={uiModels.messageDetailsPanel.events}
-      ariaLabel="Message details panel"
-      mockId="mock.message-details-panel"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Message: {panel.messageId}</span>
-        <span>Open: {panel.isOpen ? 'Yes' : 'No'}</span>
-      </div>
-      <div className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm">
-        <span>Tokens: {panel.details.tokens}</span>
-        <span>Latency: {panel.details.latencyMs}ms</span>
-      </div>
-    </Panel>
-  );
-}
-
-function SoundNotifier() {
-  const notifier = uiModels.soundNotifier.defaultState;
-  return (
-    <Panel
-      title="SoundNotifier"
-      subtitle="Additional Panel"
-      events={uiModels.soundNotifier.events}
-      ariaLabel="Sound notifier"
-      mockId="mock.sound-notifier"
-    >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Enabled: {notifier.isEnabled ? 'Yes' : 'No'}</span>
-        <span>Volume: {Math.round(notifier.volume * 100)}%</span>
-      </div>
-      <p className="text-xs text-muted-foreground">Last sound: {notifier.lastSoundId}</p>
-    </Panel>
-  );
-}
-
-function OverlayManager() {
-  const overlay = uiModels.overlayManager.defaultState;
-  return (
-    <Panel
-      title="OverlayManager"
-      subtitle="Additional Panel"
-      events={uiModels.overlayManager.events}
-      ariaLabel="Overlay manager"
-      mockId="mock.overlay-manager"
-    >
-      <p className="text-sm text-muted-foreground">
-        Active overlays: {overlay.activeOverlays.length || 'None'}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Z-stack: {overlay.zStack.length ? overlay.zStack.join(', ') : 'Empty'}
-      </p>
-      <p className="text-xs text-muted-foreground">Last event: {overlay.lastEventId}</p>
-    </Panel>
   );
 }
 
 function MainPane() {
   return (
-    <section className="main-pane flex min-h-[70vh] flex-col gap-4" aria-label="Main pane">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        ID: mock.main-pane
-      </p>
-      <SystemStateBar />
-      <ThreadHeader />
-      <MessageTimeline className="timeline-panel flex-1" />
-      {/* Bottom stack keeps composer anchored while reserving space for the drawer. */}
-      <div className="main-pane__bottom mt-auto space-y-4">
+    <section className="main-pane flex h-full flex-col overflow-hidden" aria-label="Main pane">
+      <div className="flex-none space-y-4 pb-4">
+        <SystemStateBar />
+        <ThreadHeader />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
+        <MessageTimeline />
+      </div>
+      <div className="flex-none pt-4">
         <MessageComposer />
-        <ThreadOverviewDrawer />
       </div>
     </section>
   );
@@ -398,18 +322,23 @@ function MainPane() {
 
 function App() {
   const shell = useAppShellState();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
-    <main className="app-root min-h-screen bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.15),_transparent_55%),linear-gradient(135deg,_rgba(16,20,43,0.95),_rgba(11,16,33,0.95))] text-foreground">
-      <div className="app-container mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10">
+    <main className="app-root h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.15),_transparent_55%),linear-gradient(135deg,_rgba(16,20,43,0.95),_rgba(11,16,33,0.95))] text-foreground">
+      <div className="app-container mx-auto flex h-full max-w-7xl flex-col px-6 py-6">
         <AppShell shell={shell}>
-          <div className="layout-grid grid gap-6 lg:grid-cols-[320px,1fr]">
-            <Sidebar />
+          <div
+            className={cn(
+              'layout-grid grid h-full gap-6 transition-all duration-300',
+              sidebarCollapsed ? 'grid-cols-[64px,1fr]' : 'lg:grid-cols-[280px,1fr]',
+            )}
+          >
+            <Sidebar
+              isCollapsed={sidebarCollapsed}
+              onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+            />
             <MainPane />
-          </div>
-          <div className="additional-grid grid gap-4 lg:grid-cols-3" aria-label="Additional panels">
-            <MessageDetailsPanel />
-            <SoundNotifier />
-            <OverlayManager />
           </div>
         </AppShell>
       </div>

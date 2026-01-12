@@ -13,6 +13,8 @@ export type PanelProps = {
   ariaLabel?: string;
   className?: string;
   mockId?: string;
+  showHeader?: boolean;
+  showDebug?: boolean;
 };
 
 export function Panel({
@@ -25,40 +27,44 @@ export function Panel({
   ariaLabel,
   className,
   mockId,
+  showHeader = true,
+  showDebug = false,
 }: PanelProps) {
   return (
     <Card
       aria-label={ariaLabel ?? title}
       className={cn('panel', className)}
-      data-mock-id={mockId ?? title}
+      data-mock-id={showDebug ? (mockId ?? title) : undefined}
     >
-      <CardHeader
-        className={cn(
-          layout === 'row'
-            ? 'flex-row items-center justify-between gap-4 space-y-0'
-            : 'flex-col gap-2 space-y-0',
-        )}
-      >
-        <div>
-          <CardDescription>{subtitle ?? 'Component'}</CardDescription>
-          <CardTitle>{title}</CardTitle>
-          {mockId && (
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              ID: {mockId}
-            </p>
+      {showHeader && (
+        <CardHeader
+          className={cn(
+            layout === 'row'
+              ? 'flex-row items-center justify-between gap-4 space-y-0'
+              : 'flex-col gap-2 space-y-0',
           )}
-        </div>
-        {events.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {events.map((event) => (
-              <Badge key={event} variant="outline">
-                {event}
-              </Badge>
-            ))}
+        >
+          <div>
+            {subtitle && <CardDescription>{subtitle}</CardDescription>}
+            <CardTitle>{title}</CardTitle>
+            {showDebug && mockId && (
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                ID: {mockId}
+              </p>
+            )}
           </div>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-3">{children}</CardContent>
+          {showDebug && events.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {events.map((event) => (
+                <Badge key={event} variant="outline">
+                  {event}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </CardHeader>
+      )}
+      <CardContent className={cn('space-y-3', !showHeader && 'pt-4')}>{children}</CardContent>
       {footer && <CardFooter className="text-sm text-muted-foreground">{footer}</CardFooter>}
     </Card>
   );

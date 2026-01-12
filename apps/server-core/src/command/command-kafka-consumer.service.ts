@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Kafka } from 'kafkajs';
+import { Kafka, type ConsumerConfig } from 'kafkajs';
 import { kafkaConfig } from '../config';
 import { CommandProcessorService } from './command-processor.service';
 import { CommandKafkaProducer } from './command-kafka.producer';
@@ -11,7 +11,12 @@ export class CommandKafkaConsumer implements OnModuleInit, OnModuleDestroy {
     clientId: `${kafkaConfig.clientId}-commands`,
     brokers: kafkaConfig.brokers,
   });
-  private readonly consumer = this.kafka.consumer({ groupId: kafkaConfig.commandsGroupId });
+  private readonly consumer = this.kafka.consumer({
+    groupId: kafkaConfig.commandsGroupId,
+    ...(kafkaConfig.commandsGroupInstanceId
+      ? { groupInstanceId: kafkaConfig.commandsGroupInstanceId }
+      : {}),
+  } as ConsumerConfig);
 
   constructor(
     private readonly processor: CommandProcessorService,
@@ -49,6 +54,7 @@ export class CommandKafkaConsumer implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
+    await this.consumer.stop();
     await this.consumer.disconnect();
   }
 }

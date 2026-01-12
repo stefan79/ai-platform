@@ -10,7 +10,9 @@ export const kafkaConfig = {
   domainChangesTopic: process.env.KAFKA_DOMAIN_CHANGES_TOPIC ?? 'ai-platform-domain-changes',
   deadLetterTopic: process.env.KAFKA_DEAD_LETTER_TOPIC ?? 'ai-platform-dead-letter',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-core',
+  groupInstanceId: process.env.KAFKA_GROUP_INSTANCE_ID,
   commandsGroupId: process.env.KAFKA_COMMANDS_GROUP_ID ?? 'ai-platform-server-core-commands',
+  commandsGroupInstanceId: process.env.KAFKA_COMMANDS_GROUP_INSTANCE_ID,
 };
 
 export const dynamoConfig = {

@@ -6,11 +6,13 @@ import { kafkaConfig } from './config';
 let connectMock: jest.Mock;
 let subscribeMock: jest.Mock;
 let runMock: jest.Mock;
+let stopMock: jest.Mock;
 let disconnectMock: jest.Mock;
 let consumerMock: {
   connect: jest.Mock;
   subscribe: jest.Mock;
   run: jest.Mock;
+  stop: jest.Mock;
   disconnect: jest.Mock;
 };
 
@@ -27,11 +29,13 @@ describe('KafkaConsumerService', () => {
     connectMock = jest.fn().mockResolvedValue(undefined);
     subscribeMock = jest.fn().mockResolvedValue(undefined);
     runMock = jest.fn().mockResolvedValue(undefined);
+    stopMock = jest.fn().mockResolvedValue(undefined);
     disconnectMock = jest.fn().mockResolvedValue(undefined);
     consumerMock = {
       connect: connectMock,
       subscribe: subscribeMock,
       run: runMock,
+      stop: stopMock,
       disconnect: disconnectMock,
     };
 
@@ -145,6 +149,7 @@ describe('KafkaConsumerService', () => {
     await service.onModuleInit();
     await service.onModuleDestroy();
 
+    expect(stopMock).toHaveBeenCalled();
     expect(disconnectMock).toHaveBeenCalled();
   });
 });

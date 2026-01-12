@@ -90,6 +90,20 @@ Stop local infrastructure:
 pnpx nx run infra:down --output-style=stream
 ```
 
+## Shutdown behavior
+
+The REST, WS, and core servers trap `SIGINT`/`SIGTERM` to close HTTP/WS resources and stop
+Kafka consumers before disconnecting. This helps ensure offsets are committed and avoids
+consumer group rebalances during normal shutdown.
+
+## Kafka static group membership
+
+Set stable `groupInstanceId` values to allow Kafka consumers to resume cleanly across restarts:
+
+- `KAFKA_GROUP_INSTANCE_ID` (server-core event consumer + server-ws client group)
+- `KAFKA_COMMANDS_GROUP_INSTANCE_ID` (server-core command consumer)
+- `KAFKA_OUTBOX_GROUP_INSTANCE_ID` (server-ws outbox consumer)
+
 ## Test
 
 Run all tests across the workspace:

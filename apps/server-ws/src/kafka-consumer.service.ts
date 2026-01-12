@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Kafka } from 'kafkajs';
+import { Kafka, type ConsumerConfig } from 'kafkajs';
 import { parseEventKafkaEnvelope } from '@ai-platform/protocol-core';
 import type { WsEnvelope } from '@ai-platform/protocol-ws';
 import { kafkaConfig } from './config';
@@ -12,7 +12,12 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
     clientId: `${kafkaConfig.clientId}-outbox`,
     brokers: kafkaConfig.brokers,
   });
-  private readonly consumer = this.kafka.consumer({ groupId: kafkaConfig.outboxGroupId });
+  private readonly consumer = this.kafka.consumer({
+    groupId: kafkaConfig.outboxGroupId,
+    ...(kafkaConfig.outboxGroupInstanceId
+      ? { groupInstanceId: kafkaConfig.outboxGroupInstanceId }
+      : {}),
+  } as ConsumerConfig);
 
   constructor(private readonly gateway: WsGateway) {}
 
@@ -57,6 +62,7 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
+    await this.consumer.stop();
     await this.consumer.disconnect();
   }
 }

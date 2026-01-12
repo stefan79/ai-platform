@@ -18,10 +18,37 @@ export async function startServer() {
   }
 }
 
+function registerShutdownSignals(server: Awaited<ReturnType<typeof startServer>>) {
+  let shuttingDown = false;
+  const shutdown = async (signal: string) => {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+    server.log.info({ signal }, 'server-rest shutting down...');
+    try {
+      await server.close();
+      server.log.info('server-rest shutdown complete.');
+    } catch (error) {
+      server.log.error(error, 'server-rest shutdown failed.');
+      process.exitCode = 1;
+    } finally {
+      process.exit();
+    }
+  };
+
+  process.once('SIGINT', () => void shutdown('SIGINT'));
+  process.once('SIGTERM', () => void shutdown('SIGTERM'));
+}
+
 if (require.main === module) {
-  startServer().catch((error) => {
-    const logger = createLogger();
-    logger.error(error);
-    process.exit(1);
-  });
+  startServer()
+    .then((server) => {
+      registerShutdownSignals(server);
+    })
+    .catch((error) => {
+      const logger = createLogger();
+      logger.error(error);
+      process.exit(1);
+    });
 }

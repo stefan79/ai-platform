@@ -7,5 +7,7 @@ export const kafkaConfig = {
   eventsTopic: process.env.KAFKA_EVENTS_TOPIC ?? 'ai-platform-events',
   outboxTopic: process.env.KAFKA_OUTBOX_TOPIC ?? 'ai-platform-outbox',
   groupId: process.env.KAFKA_GROUP_ID ?? 'ai-platform-server-ws',
+  groupInstanceId: process.env.KAFKA_GROUP_INSTANCE_ID,
   outboxGroupId: process.env.KAFKA_OUTBOX_GROUP_ID ?? 'ai-platform-server-ws-outbox',
+  outboxGroupInstanceId: process.env.KAFKA_OUTBOX_GROUP_INSTANCE_ID,
 };

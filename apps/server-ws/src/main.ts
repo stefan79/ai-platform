@@ -16,9 +16,36 @@ export async function startServer() {
   return server;
 }
 
+function registerShutdownSignals(app: NestFastifyApplication) {
+  let shuttingDown = false;
+  const shutdown = async (signal: string) => {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+    logger.log(`server-ws received ${signal}, shutting down...`);
+    try {
+      await app.close();
+      logger.log('server-ws shutdown complete.');
+    } catch (error) {
+      logger.error('server-ws shutdown failed.', error as Error);
+      process.exitCode = 1;
+    } finally {
+      process.exit();
+    }
+  };
+
+  process.once('SIGINT', () => void shutdown('SIGINT'));
+  process.once('SIGTERM', () => void shutdown('SIGTERM'));
+}
+
 if (require.main === module) {
-  startServer().catch((error) => {
-    logger.error(error instanceof Error ? error.stack : String(error));
-    process.exit(1);
-  });
+  startServer()
+    .then((server) => {
+      registerShutdownSignals(server);
+    })
+    .catch((error) => {
+      logger.error(error instanceof Error ? error.stack : String(error));
+      process.exit(1);
+    });
 }

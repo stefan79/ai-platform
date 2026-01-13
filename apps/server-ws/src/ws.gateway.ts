@@ -39,7 +39,12 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       return undefined;
     }
-    const candidate = (payload as Record<string, unknown>).userId;
+    const record = payload as Record<string, unknown>;
+    const innerPayload =
+      typeof record.type === 'string' && 'payload' in record
+        ? (record.payload as Record<string, unknown> | null)
+        : record;
+    const candidate = innerPayload?.userId;
     return typeof candidate === 'string' ? candidate : undefined;
   }
 
@@ -111,20 +116,29 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new Error('UserId mismatch');
       }
 
+      const bodyEnvelope = envelope.body as Record<string, unknown> | null;
+      const hasInnerEnvelope =
+        bodyEnvelope &&
+        typeof bodyEnvelope === 'object' &&
+        typeof bodyEnvelope.type === 'string' &&
+        'payload' in bodyEnvelope;
+      const messageType = hasInnerEnvelope ? (bodyEnvelope.type as string) : envelope.type;
+      const messagePayload = hasInnerEnvelope ? bodyEnvelope.payload : envelope.body;
+
       const kafkaEnvelope: EventKafkaEnvelope = {
         id: envelope.id,
         ts: envelope.ts,
-        type: envelope.type,
-        body: envelope.body,
+        type: messageType,
+        body: messagePayload,
         sessionId,
         userId,
-        messageType: envelope.type,
+        messageType: messageType,
         topic: kafkaConfig.eventsTopic,
         partition: 0,
         offset: 0,
       };
 
-      const body = envelope.body as Record<string, unknown> | null;
+      const body = messagePayload as Record<string, unknown> | null;
       const threadId =
         body && typeof body === 'object' && typeof body.threadId === 'string'
           ? body.threadId

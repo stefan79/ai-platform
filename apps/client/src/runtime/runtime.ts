@@ -2,14 +2,14 @@ import {
   parseServerDetailsResponse,
   parseThreadMessagesResponse,
 } from '@ai-platform/protocol-rest';
-import { parseEventEnvelope } from '@ai-platform/protocol-generated';
+import { eventSchemas, parseEventEnvelope } from '@ai-platform/protocol-generated';
 import { parseEventPayload } from '@ai-platform/protocol-generated';
 import { match } from 'ts-pattern';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 import { logger } from '../logger';
 import type { AppStore } from './store';
-import type { AppState, BootstrapSnapshot, EventEnvelope } from './types';
+import type { AppState, BootstrapSnapshot, EventEnvelope, MessageEnvelope } from './types';
 import { fetchJson } from '../api/client';
 import type { ThreadBus } from './thread-bus';
 
@@ -29,6 +29,13 @@ export type AppRuntime = {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isMessageEnvelope = (value: unknown): value is MessageEnvelope => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return typeof value.type === 'string' && 'payload' in value;
+};
 
 const coerceBootstrapSnapshot = (payload: unknown): BootstrapSnapshot => {
   if (!isRecord(payload)) {
@@ -117,23 +124,38 @@ export const createAppRuntime = (options: {
   const handleIncomingMessage = (payload: unknown) => {
     try {
       const envelope = parseEventEnvelope(payload) as EventEnvelope;
+      if (isMessageEnvelope(envelope.body)) {
+        const inner = envelope.body;
+        const parsed =
+          inner.type in eventSchemas
+            ? parseEventPayload(inner.type as never, inner.payload)
+            : inner.payload;
+        const threadId =
+          typeof (parsed as { threadId?: string }).threadId === 'string'
+            ? (parsed as { threadId: string }).threadId
+            : '';
+        threadBus.publish({
+          kind: 'envelope',
+          threadId,
+          envelope: { type: inner.type, payload: parsed },
+        });
+        return;
+      }
       match(envelope.type)
         .with('assistant.message', () => {
           const parsed = parseEventPayload('assistant.message', envelope.body);
           threadBus.publish({
-            kind: 'single',
+            kind: 'envelope',
             threadId: parsed.threadId,
-            payloadType: 'assistant.message',
-            payload: parsed,
+            envelope: { type: 'assistant.message', payload: parsed },
           });
         })
         .with('user.message', () => {
           const parsed = parseEventPayload('user.message', envelope.body);
           threadBus.publish({
-            kind: 'single',
+            kind: 'envelope',
             threadId: parsed.threadId,
-            payloadType: 'user.message',
-            payload: parsed,
+            envelope: { type: 'user.message', payload: parsed },
           });
         })
         .otherwise(() => {
@@ -223,7 +245,7 @@ export const createAppRuntime = (options: {
   const subscribeThreadBus = () => {
     unsubscribeBus?.();
     unsubscribeBus = threadBus.subscribe((event) => {
-      if (event.kind !== 'single' || event.payloadType !== 'user.message') {
+      if (event.kind !== 'envelope' || event.envelope.type !== 'user.message') {
         return;
       }
       if (!socket || !socket.connected) {
@@ -233,8 +255,8 @@ export const createAppRuntime = (options: {
         v: 1,
         id: crypto.randomUUID(),
         ts: Date.now(),
-        type: event.payloadType,
-        body: event.payload,
+        type: 'message',
+        body: event.envelope,
         direction: 'client',
       };
       socket.emit('message', envelope);
@@ -263,20 +285,10 @@ export const createAppRuntime = (options: {
       headers: await getAuthHeaders(),
     });
     const response = parseThreadMessagesResponse(payload);
-    const messages = response.items.map((item) => ({
-      id: item.messageId,
-      role: item.authorId === config.userId ? 'user' : 'assistant',
-      timestamp: item.timestamp,
-      body: item.body,
-      status: 'complete',
-      responseTo: undefined,
-      assistantId: item.authorId === config.userId ? undefined : item.authorId,
-      threadId: item.threadId,
-    }));
     threadBus.publish({
       kind: 'history',
       threadId,
-      messages,
+      envelopes: response.items,
     });
   };
 

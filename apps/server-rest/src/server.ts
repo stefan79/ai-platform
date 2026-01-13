@@ -9,6 +9,7 @@ import {
   createThreadMessagesResponse,
   createVersionResponse,
 } from '@ai-platform/protocol-rest';
+import { eventSchemas, parseEventPayload } from '@ai-platform/protocol-generated';
 import { createLogger } from './logger';
 import { verifyClerkJwt } from './auth/clerk-jwt';
 
@@ -164,25 +165,26 @@ export function buildServer(contextState: ContextState) {
 
     const items = (result.Items ?? []) as Array<{
       payload?: {
-        messageId: string;
-        authorId: string;
-        timestamp: number;
-        body: string;
+        message?: {
+          type?: string;
+          payload?: unknown;
+        };
       };
-      aggregateId?: string;
     }>;
 
     const messages = items
       .map((item) => {
-        if (!item.payload) {
+        const envelope = item.payload?.message;
+        if (!envelope?.type) {
           return null;
         }
+        if (!(envelope.type in eventSchemas)) {
+          throw new Error(`Unsupported message type: ${envelope.type}`);
+        }
+        const payload = parseEventPayload(envelope.type as never, envelope.payload);
         return {
-          messageId: item.payload.messageId,
-          threadId,
-          authorId: item.payload.authorId,
-          timestamp: item.payload.timestamp,
-          body: item.payload.body,
+          type: envelope.type,
+          payload,
         };
       })
       .filter((message): message is NonNullable<typeof message> => Boolean(message));

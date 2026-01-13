@@ -39,17 +39,21 @@ export class SaveUserMessageCommandHandler implements CommandHandler {
     const command = this.context.commandSchemaRegistry.parse<
       z.infer<typeof this.userMessageBodySchema>
     >(envelope, 'command.save-user-message');
-    const payload = command.payload;
+    const payload = this.context.eventSchemaRegistry.parsePayload<
+      z.infer<typeof this.userMessageBodySchema>
+    >('user.message', command.payload);
     const authorId = context.userId ?? context.sessionId;
+    const messageEnvelope = {
+      type: 'user.message',
+      payload,
+    };
     const event = createDomainEventEnvelope({
       aggregateId: payload.threadId,
       aggregateType: 'thread',
       type: 'thread.message-added',
       payload: {
-        messageId: payload.messageId,
         authorId,
-        timestamp: payload.timestamp,
-        body: payload.body,
+        message: messageEnvelope,
       },
     });
     const thread = await this.repository.loadThread(payload.threadId);

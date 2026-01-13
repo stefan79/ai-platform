@@ -45,8 +45,11 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
             v: 1,
             id: envelope.id,
             ts: envelope.ts,
-            type: envelope.type,
-            body: envelope.body,
+            type: 'message',
+            body: {
+              type: envelope.type,
+              payload: envelope.body,
+            },
             direction: 'server',
           };
 

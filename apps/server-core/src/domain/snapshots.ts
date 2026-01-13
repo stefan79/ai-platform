@@ -92,13 +92,24 @@ export const applyThreadEvent = (
     | DomainEventEnvelope<'thread.metadata-updated'>,
 ): ThreadSnapshot => {
   switch (event.type) {
-    case 'thread.message-added':
+    case 'thread.message-added': {
+      const message = event.payload.message.payload as {
+        messageId: string;
+        timestamp: number;
+        body: string;
+      };
       return {
         ...snapshot,
-        lastMessage: event.payload,
+        lastMessage: {
+          messageId: message.messageId,
+          authorId: event.payload.authorId,
+          timestamp: message.timestamp,
+          body: message.body,
+        },
         updatedAt: event.occurredAt,
         version: snapshot.version + 1,
       };
+    }
     case 'thread.title-updated':
       return {
         ...snapshot,

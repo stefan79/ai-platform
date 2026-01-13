@@ -27,4 +27,12 @@ export class EventSchemaRegistry {
     const body = schema.parse(envelope.body);
     return { ...envelope, type, body };
   }
+
+  parsePayload<TBody>(type: string, payload: unknown): TBody {
+    const schema = this.schemas.get(type);
+    if (!schema) {
+      throw new Error(`No event schema registered for type ${type}`);
+    }
+    return schema.parse(payload) as TBody;
+  }
 }

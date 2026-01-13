@@ -213,7 +213,7 @@ if ! aws dynamodb describe-table \
 fi
 
 THREAD_ID="${THREAD_ID:-550e8400-e29b-41d4-a716-446655440000}"
-USER_ID="${USER_ID:-6f9a2c1b-0c4d-4f8f-8b0a-1a2b3c4d5e6f}"
+USER_ID="${USER_ID:-user_38CqAusMsMsrdGS5wRNSph9Lc9D}"
 THREAD_TITLE="${THREAD_TITLE:-Seeded Thread}"
 THREAD_PK="AGG#thread#${THREAD_ID}"
 THREAD_SK="SNAPSHOT#0"

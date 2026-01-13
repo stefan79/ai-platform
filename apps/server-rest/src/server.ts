@@ -58,7 +58,11 @@ export function buildServer(contextState: ContextState) {
     logger: createLogger(),
   });
 
-  const defaultOrigins = ['http://localhost:4300', 'https://ai-platform.local'];
+  const defaultOrigins = [
+    'http://localhost:4300',
+    'http://ai-platform.local:8080',
+    'https://ai-platform.local:8443',
+  ];
   const corsOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
     : defaultOrigins;
@@ -87,6 +91,7 @@ export function buildServer(contextState: ContextState) {
 
     const token = extractBearerToken(request.headers.authorization);
     if (!token) {
+      request.log.warn({ path: request.url }, 'Missing bearer token');
       return reply.status(401).send({ error: 'Unauthorized' });
     }
 
@@ -94,7 +99,7 @@ export function buildServer(contextState: ContextState) {
       const { userId, claims } = await verifyClerkJwt(token);
       request.auth = { userId, claims, token };
     } catch (error) {
-      request.log.warn({ error }, 'Failed to verify JWT');
+      request.log.warn({ error, path: request.url }, 'Failed to verify JWT');
       return reply.status(401).send({ error: 'Invalid token' });
     }
   });
@@ -121,6 +126,10 @@ export function buildServer(contextState: ContextState) {
   server.get('/api/v1/users/:userId/threads/:threadId/messages', async (request, reply) => {
     const { threadId, userId } = request.params as { userId: string; threadId: string };
     if (request.auth?.userId !== userId) {
+      request.log.warn(
+        { path: request.url, userId, authUserId: request.auth?.userId },
+        'User mismatch for thread messages',
+      );
       return reply.status(403).send({ error: 'Forbidden' });
     }
     const query = request.query as Partial<{

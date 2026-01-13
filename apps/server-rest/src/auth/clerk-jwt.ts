@@ -3,6 +3,12 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
 export type ClerkJwtClaims = JWTPayload & {
   sub?: string;
   user_id?: string;
+  public_metadata?: {
+    platformUserId?: string;
+  };
+  publicMetadata?: {
+    platformUserId?: string;
+  };
 };
 
 type VerifiedClerkJwt = {
@@ -36,6 +42,12 @@ const resolveUserId = (claims: ClerkJwtClaims): string => {
   }
   if (typeof claims.user_id === 'string') {
     return claims.user_id;
+  }
+  if (typeof claims.public_metadata?.platformUserId === 'string') {
+    return claims.public_metadata.platformUserId;
+  }
+  if (typeof claims.publicMetadata?.platformUserId === 'string') {
+    return claims.publicMetadata.platformUserId;
   }
   throw new Error('Missing user id claim');
 };

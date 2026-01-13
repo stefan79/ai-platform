@@ -84,16 +84,18 @@ Traefik is wired up in `docker-compose.dev.yml`:
 docker compose -f docker-compose.dev.yml up -d traefik
 ```
 
+Traefik listens on `http://localhost:8080` and `https://localhost:8443` in dev.
+
 ### 4) Update client base URLs
 
 Point the client at the HTTPS endpoints:
 
 ```sh
-export VITE_REST_BASE_URL=https://api.ai-platform.local
-export VITE_WS_BASE_URL=https://ws.ai-platform.local
+export VITE_REST_BASE_URL=https://api.ai-platform.local:8443
+export VITE_WS_BASE_URL=https://ws.ai-platform.local:8443
 ```
 
-The client will be reachable at `https://ai-platform.local` once it is running.
+The client will be reachable at `https://ai-platform.local:8443` once it is running.
 Remember to add these HTTPS origins to your Clerk instance (allowed origins + redirect URLs).
 
 ## Protocol generation

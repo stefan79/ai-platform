@@ -22,15 +22,15 @@ http:
     client:
       loadBalancer:
         servers:
-          - url: http://host.docker.internal:4300
+          - url: http://host.containers.internal:4300
     server-rest:
       loadBalancer:
         servers:
-          - url: http://host.docker.internal:3000
+          - url: http://host.containers.internal:3000
     server-ws:
       loadBalancer:
         servers:
-          - url: http://host.docker.internal:3001
+          - url: http://host.containers.internal:3001
 
 tls:
   certificates:

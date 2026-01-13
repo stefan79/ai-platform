@@ -10,6 +10,17 @@ import {
   createVersionResponse,
 } from '@ai-platform/protocol-rest';
 import { createLogger } from './logger';
+import { verifyClerkJwt } from './auth/clerk-jwt';
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    auth?: {
+      userId: string;
+      token: string;
+      claims: Record<string, unknown>;
+    };
+  }
+}
 
 const dynamoConfig = {
   region: process.env.AWS_REGION ?? 'us-east-1',
@@ -47,9 +58,45 @@ export function buildServer(contextState: ContextState) {
     logger: createLogger(),
   });
 
+  const defaultOrigins = ['http://localhost:4300', 'https://ai-platform.local'];
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+    : defaultOrigins;
+
   server.register(cors, {
-    origin: ['http://localhost:4300'],
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['authorization', 'content-type'],
+  });
+
+  const extractBearerToken = (header?: string): string | undefined => {
+    if (!header) {
+      return undefined;
+    }
+    const [scheme, token] = header.split(' ');
+    if (scheme?.toLowerCase() !== 'bearer' || !token) {
+      return undefined;
+    }
+    return token;
+  };
+
+  server.addHook('preHandler', async (request, reply) => {
+    if (!request.url.startsWith('/api/v1')) {
+      return;
+    }
+
+    const token = extractBearerToken(request.headers.authorization);
+    if (!token) {
+      return reply.status(401).send({ error: 'Unauthorized' });
+    }
+
+    try {
+      const { userId, claims } = await verifyClerkJwt(token);
+      request.auth = { userId, claims, token };
+    } catch (error) {
+      request.log.warn({ error }, 'Failed to verify JWT');
+      return reply.status(401).send({ error: 'Invalid token' });
+    }
   });
 
   server.get('/api/health', async (_request, reply) => {
@@ -72,7 +119,10 @@ export function buildServer(contextState: ContextState) {
   });
 
   server.get('/api/v1/users/:userId/threads/:threadId/messages', async (request, reply) => {
-    const { threadId } = request.params as { userId: string; threadId: string };
+    const { threadId, userId } = request.params as { userId: string; threadId: string };
+    if (request.auth?.userId !== userId) {
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
     const query = request.query as Partial<{
       limit: string;
       cursor: string;

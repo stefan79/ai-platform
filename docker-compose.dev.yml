@@ -1,4 +1,18 @@
 services:
+  traefik:
+    image: traefik:v3.2.2
+    container_name: ai-platform-traefik
+    command: ['--configFile=/etc/traefik/traefik.yml']
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./certs:/certs:ro
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v23.3.12
     container_name: ai-platform-redpanda

@@ -23,7 +23,6 @@ export const defaultRuntimeConfig: AppRuntimeConfig = {
   restBaseUrl: import.meta.env.VITE_REST_BASE_URL ?? 'http://localhost:3000',
   snapshotPath: import.meta.env.VITE_SNAPSHOT_PATH ?? '/api/v1/server',
   wsBaseUrl: import.meta.env.VITE_WS_BASE_URL ?? 'http://localhost:3001',
-  userId: import.meta.env.VITE_USER_ID ?? '6f9a2c1b-0c4d-4f8f-8b0a-1a2b3c4d5e6f',
 };
 
 export function AppRuntimeProvider({ children, config }: AppRuntimeProviderProps) {
@@ -37,12 +36,26 @@ export function AppRuntimeProvider({ children, config }: AppRuntimeProviderProps
       restBaseUrl: config?.restBaseUrl ?? defaultRuntimeConfig.restBaseUrl,
       snapshotPath: config?.snapshotPath ?? defaultRuntimeConfig.snapshotPath,
       wsBaseUrl: config?.wsBaseUrl ?? defaultRuntimeConfig.wsBaseUrl,
-      userId: profile.userId ?? config?.userId ?? defaultRuntimeConfig.userId,
+      userId: profile.userId ?? config?.userId,
+      getToken: config?.getToken ?? profile.getToken,
     }),
-    [config?.restBaseUrl, config?.snapshotPath, config?.wsBaseUrl, config?.userId, profile.userId],
+    [
+      config?.restBaseUrl,
+      config?.snapshotPath,
+      config?.wsBaseUrl,
+      config?.userId,
+      config?.getToken,
+      profile.userId,
+      profile.getToken,
+    ],
   );
 
   useEffect(() => {
+    if (!resolvedConfig.userId || !resolvedConfig.getToken) {
+      runtimeRef.current?.stop();
+      runtimeRef.current = null;
+      return;
+    }
     runtimeRef.current?.stop();
     const runtime = createAppRuntime({
       store: storeRef.current,

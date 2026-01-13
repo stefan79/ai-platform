@@ -38,6 +38,7 @@ testem.log
 /typings
 .dynamodb-data
 dynamodb-data
+/certs
 .codex
 
 # System Files

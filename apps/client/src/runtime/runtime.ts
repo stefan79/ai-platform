@@ -17,7 +17,8 @@ export type AppRuntimeConfig = {
   restBaseUrl: string;
   snapshotPath: string;
   wsBaseUrl: string;
-  userId: string;
+  userId?: string;
+  getToken?: () => Promise<string | null>;
 };
 
 export type AppRuntime = {
@@ -40,13 +41,10 @@ const coerceBootstrapSnapshot = (payload: unknown): BootstrapSnapshot => {
   };
 };
 
-const resolveSocketConfig = (wsBaseUrl: string, userId?: string) => {
+const resolveSocketConfig = (wsBaseUrl: string) => {
   try {
     const url = new URL(wsBaseUrl);
     const query = Object.fromEntries(url.searchParams.entries());
-    if (userId) {
-      query.userId = query.userId ?? userId;
-    }
     url.search = '';
     return {
       url: url.toString(),
@@ -55,7 +53,7 @@ const resolveSocketConfig = (wsBaseUrl: string, userId?: string) => {
   } catch {
     return {
       url: wsBaseUrl,
-      query: userId ? { userId } : undefined,
+      query: undefined,
     };
   }
 };
@@ -74,9 +72,29 @@ export const createAppRuntime = (options: {
     store.dispatch({ type: 'connection.status', status, error });
   };
 
+  const getAuthToken = async (): Promise<string> => {
+    if (!config.getToken) {
+      throw new Error('Missing auth token provider');
+    }
+    const token = await config.getToken();
+    if (!token) {
+      throw new Error('Missing auth token');
+    }
+    return token;
+  };
+
+  const getAuthHeaders = async (): Promise<HeadersInit> => ({
+    Authorization: `Bearer ${await getAuthToken()}`,
+  });
+
   const bootstrap = async (): Promise<void> => {
     dispatchStatus('bootstrapping');
-    const payload = await fetchJson(config.restBaseUrl, config.snapshotPath);
+    if (!config.userId) {
+      throw new Error('Missing userId');
+    }
+    const payload = await fetchJson(config.restBaseUrl, config.snapshotPath, {
+      headers: await getAuthHeaders(),
+    });
     let snapshot = coerceBootstrapSnapshot(payload);
     try {
       const serverDetails = parseServerDetailsResponse(payload);
@@ -126,12 +144,16 @@ export const createAppRuntime = (options: {
     }
   };
 
-  const connectSocket = () => {
-    const socketConfig = resolveSocketConfig(config.wsBaseUrl, config.userId);
+  const connectSocket = async () => {
+    const socketConfig = resolveSocketConfig(config.wsBaseUrl);
+    const token = await getAuthToken();
     socket = io(socketConfig.url, {
       transports: ['websocket'],
       autoConnect: false,
       query: socketConfig.query,
+      auth: {
+        token,
+      },
     });
 
     socket.on('connect', () => {
@@ -153,6 +175,16 @@ export const createAppRuntime = (options: {
         return;
       }
       void bootstrapAndEnable();
+    });
+
+    socket.io.on('reconnect_attempt', async () => {
+      try {
+        socket!.auth = {
+          token: await getAuthToken(),
+        };
+      } catch (error) {
+        logger.warn({ error }, 'Failed to refresh WS auth token');
+      }
     });
 
     socket.on('connect_error', (error) => {
@@ -223,8 +255,13 @@ export const createAppRuntime = (options: {
     if (!threadId) {
       return;
     }
+    if (!config.userId) {
+      throw new Error('Missing userId');
+    }
     const path = `/api/v1/users/${config.userId}/threads/${threadId}/messages?limit=50&direction=backward`;
-    const payload = await fetchJson(config.restBaseUrl, path);
+    const payload = await fetchJson(config.restBaseUrl, path, {
+      headers: await getAuthHeaders(),
+    });
     const response = parseThreadMessagesResponse(payload);
     const messages = response.items.map((item) => ({
       id: item.messageId,
@@ -262,12 +299,18 @@ export const createAppRuntime = (options: {
   return {
     start: async () => {
       stopped = false;
-      await bootstrapAndEnable();
-      if (stopped) {
-        return;
+      try {
+        await bootstrapAndEnable();
+        if (stopped) {
+          return;
+        }
+        await connectSocket();
+        subscribeThreadBus();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Runtime start failed';
+        dispatchStatus('error', message);
+        logger.error({ error }, 'Failed to start runtime');
       }
-      connectSocket();
-      subscribeThreadBus();
     },
     stop: () => {
       stopped = true;

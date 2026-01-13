@@ -1,0 +1,38 @@
+http:
+  routers:
+    client:
+      rule: Host(`ai-platform.local`)
+      entryPoints:
+        - websecure
+      service: client
+      tls: {}
+    server-rest:
+      rule: Host(`api.ai-platform.local`)
+      entryPoints:
+        - websecure
+      service: server-rest
+      tls: {}
+    server-ws:
+      rule: Host(`ws.ai-platform.local`)
+      entryPoints:
+        - websecure
+      service: server-ws
+      tls: {}
+  services:
+    client:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:4300
+    server-rest:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:3000
+    server-ws:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:3001
+
+tls:
+  certificates:
+    - certFile: /certs/ai-platform.local.pem
+      keyFile: /certs/ai-platform.local-key.pem

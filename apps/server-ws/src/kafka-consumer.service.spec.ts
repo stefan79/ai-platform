@@ -85,8 +85,11 @@ describe('KafkaConsumerService', () => {
       v: 1,
       id: 'evt-1',
       ts: 123,
-      type: 'user.message',
-      body: envelope.body,
+      type: 'message',
+      body: {
+        type: envelope.type,
+        payload: envelope.body,
+      },
       direction: 'server',
     });
   });

@@ -29,11 +29,16 @@ describe('WsGateway', () => {
       v: 1,
       id: 'evt-1',
       ts: now,
-      type: 'user.message',
+      type: 'message',
       direction: 'client',
       body: {
-        timestamp: now,
-        body: 'Hello from client',
+        type: 'user.message',
+        payload: {
+          messageId: 'msg-1',
+          threadId: 'thread-1',
+          timestamp: now,
+          body: 'Hello from client',
+        },
       },
     };
 
@@ -51,16 +56,16 @@ describe('WsGateway', () => {
       {
         id: payload.id,
         ts: payload.ts,
-        type: payload.type,
-        body: payload.body,
+        type: payload.body.type,
+        body: payload.body.payload,
         sessionId: 'session-1',
         userId: 'b3d3f1e6-5d6f-4f13-8c6e-9a88b2c3d4e5',
-        messageType: payload.type,
+        messageType: payload.body.type,
         topic: 'ai-platform-events',
         partition: 0,
         offset: 0,
       },
-      'session-1',
+      'thread-1',
     );
     expect(result).toEqual({ status: 'ok' });
   });

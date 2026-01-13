@@ -6,7 +6,7 @@ const commandEnvelopeBaseSchema = z
     id: z.string(),
     ts: z.number(),
     sessionId: z.string(),
-    userId: z.string().uuid(),
+    userId: z.string(),
   })
   .strict();
 

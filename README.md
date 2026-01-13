@@ -21,6 +21,83 @@ Start the client shell (mocked UI) on `http://localhost:4300`:
 pnpx nx run client:serve --output-style=stream
 ```
 
+## Authentication (Clerk)
+
+The client and servers use Clerk-issued JWTs as the source of truth. You will need a Clerk
+application (dev instance or production) to run the stack end-to-end.
+
+### Client environment variables
+
+Set these in your shell or a `.env` file before running the Vite client:
+
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk publishable key.
+- `VITE_REST_BASE_URL` — REST base URL (default `http://localhost:3000`).
+- `VITE_WS_BASE_URL` — WS base URL (default `http://localhost:3001`).
+- `VITE_SNAPSHOT_PATH` — REST snapshot path (default `/api/v1/server`).
+
+### Server environment variables
+
+Set these for both `server-rest` and `server-ws`:
+
+- `CLERK_JWT_ISSUER` — Clerk issuer URL (recommended, e.g. `https://your-app.clerk.accounts.dev`).
+- `CLERK_JWKS_URL` — Optional override for the JWKS URL (if not using `CLERK_JWT_ISSUER`).
+- `CORS_ORIGINS` — Optional comma-separated list of allowed origins for REST (defaults to
+  `http://localhost:4300,https://ai-platform.local`).
+
+When using Clerk in production mode, make sure the publishable key and issuer correspond to the
+production instance. For local development, you can use the Clerk dev instance credentials.
+
+## Local HTTPS with Traefik + mkcert
+
+Clerk requires HTTPS for production-mode applications and is recommended for local testing. This
+repo includes a Traefik reverse proxy setup for local TLS termination.
+
+### 1) Create locally trusted certificates
+
+Install `mkcert` and trust its local CA:
+
+```sh
+mkcert -install
+```
+
+Generate a cert/key pair for the local domains:
+
+```sh
+mkdir -p certs
+mkcert -cert-file certs/ai-platform.local.pem -key-file certs/ai-platform.local-key.pem \
+  ai-platform.local '*.ai-platform.local'
+```
+
+### 2) Add local hostnames
+
+Add the following entries to `/etc/hosts`:
+
+```
+127.0.0.1 ai-platform.local api.ai-platform.local ws.ai-platform.local
+```
+
+### 3) Start Traefik
+
+Traefik is wired up in `docker-compose.dev.yml`:
+
+```sh
+docker compose -f docker-compose.dev.yml up -d traefik
+```
+
+Traefik listens on `http://localhost:8080` and `https://localhost:8443` in dev.
+
+### 4) Update client base URLs
+
+Point the client at the HTTPS endpoints:
+
+```sh
+export VITE_REST_BASE_URL=https://api.ai-platform.local:8443
+export VITE_WS_BASE_URL=https://ws.ai-platform.local:8443
+```
+
+The client will be reachable at `https://ai-platform.local:8443` once it is running.
+Remember to add these HTTPS origins to your Clerk instance (allowed origins + redirect URLs).
+
 ## Protocol generation
 
 Event payload schemas are registered in server-core strategies and code-generated into a shared,

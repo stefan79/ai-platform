@@ -26,7 +26,6 @@ import type {
   ThreadTitleState,
 } from '../models';
 import type { RawEventEnvelope } from '@ai-platform/protocol-generated';
-import type { EventPayloadMap, EventType } from '@ai-platform/protocol-generated';
 
 export type UiState = {
   appShell: AppShellState;
@@ -98,23 +97,26 @@ export type ThreadMessage = {
 
 export type EventEnvelope = RawEventEnvelope;
 
-export type ThreadEvent<T extends EventType = EventType> =
+export type MessageEnvelope = {
+  type: string;
+  payload: unknown;
+};
+
+export type ThreadEvent =
   | {
-      kind: 'single';
+      kind: 'envelope';
       threadId: string;
-      payloadType: T;
-      payload: EventPayloadMap[T];
+      envelope: MessageEnvelope;
     }
   | {
       kind: 'batch';
       threadId: string;
-      payloadType: T;
-      payloads: EventPayloadMap[T][];
+      envelopes: MessageEnvelope[];
     }
   | {
       kind: 'history';
       threadId: string;
-      messages: ThreadMessage[];
+      envelopes: MessageEnvelope[];
     };
 
 export type UiStatePatchPayload =

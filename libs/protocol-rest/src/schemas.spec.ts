@@ -28,11 +28,13 @@ describe('protocol-rest schemas', () => {
     const response = createThreadMessagesResponse({
       items: [
         {
-          messageId: '550e8400-e29b-41d4-a716-446655440000',
-          threadId: 'thread-1',
-          authorId: 'user-1',
-          timestamp: 123,
-          body: 'hello',
+          type: 'user.message',
+          payload: {
+            messageId: '550e8400-e29b-41d4-a716-446655440000',
+            threadId: 'thread-1',
+            timestamp: 123,
+            body: 'hello',
+          },
         },
       ],
     });

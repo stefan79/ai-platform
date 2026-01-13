@@ -48,12 +48,19 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
       timestamp: Date.now(),
       body: responseText,
     };
+    const payload = this.context.eventSchemaRegistry.parsePayload<
+      z.infer<typeof assistantMessageSchema>
+    >('assistant.message', message);
+    const messageEnvelope = {
+      type: 'assistant.message',
+      payload,
+    };
 
     const outgoingEnvelope: EventKafkaEnvelope = {
       id: randomUUID(),
       ts: Date.now(),
       type: 'assistant.message',
-      body: message,
+      body: payload,
       sessionId: context.sessionId,
       userId: context.userId ?? context.sessionId,
       messageType: 'assistant.message',
@@ -66,10 +73,8 @@ export class ReplyWithAssistantMessageCommandHandler implements CommandHandler {
       aggregateType: 'thread',
       type: 'thread.message-added',
       payload: {
-        messageId: message.messageId,
-        authorId: message.assistantId,
-        timestamp: message.timestamp,
-        body: message.body,
+        authorId: payload.assistantId,
+        message: messageEnvelope,
       },
     });
     const thread = await this.repository.loadThread(command.payload.threadId);

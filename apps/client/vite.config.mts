@@ -47,6 +47,7 @@ export default defineConfig({
   },
   server: {
     port: 4300,
+    allowedHosts: ['ai-platform.local'],
     proxy: {
       '/api': {
         target: 'http://localhost:3000',

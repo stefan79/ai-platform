@@ -39,7 +39,7 @@ export interface DomainRepository {
     order?: 'asc' | 'desc';
     filter?: Record<string, string>;
   }): Promise<{
-    items: DomainEventEnvelope<'thread.message-added'>['payload'][];
+    items: DomainEventEnvelope<'thread.message-added'>['payload']['message'][];
     cursor?: string;
   }>;
 
@@ -158,7 +158,7 @@ export class DynamoDomainRepository implements DomainRepository {
     order?: 'asc' | 'desc';
     filter?: Record<string, string>;
   }): Promise<{
-    items: DomainEventEnvelope<'thread.message-added'>['payload'][];
+    items: DomainEventEnvelope<'thread.message-added'>['payload']['message'][];
     cursor?: string;
   }> {
     const limit = args.limit ?? 50;
@@ -186,7 +186,7 @@ export class DynamoDomainRepository implements DomainRepository {
 
     const items = (result.Items ?? []) as DomainEventEnvelope<'thread.message-added'>[];
     return {
-      items: items.map((item) => item.payload),
+      items: items.map((item) => item.payload.message),
       cursor: encodeCursor(result.LastEvaluatedKey as Record<string, unknown> | undefined),
     };
   }

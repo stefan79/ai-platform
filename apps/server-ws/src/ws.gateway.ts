@@ -14,6 +14,7 @@ import { kafkaConfig } from './config';
 import { KafkaProducerService } from './kafka.service';
 import type { WsEnvelope } from '@ai-platform/protocol-ws';
 import type { EventKafkaEnvelope } from '@ai-platform/protocol-core';
+import { verifyClerkJwt } from './auth/clerk-jwt';
 
 @WebSocketGateway({
   cors: {
@@ -26,13 +27,49 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(@Inject(KafkaProducerService) private readonly kafka: KafkaProducerService) {}
 
-  handleConnection(socket: Socket) {
+  private resolveToken(socket: Socket): string | undefined {
+    const auth = socket.handshake.auth;
+    if (!auth || typeof auth !== 'object') {
+      return undefined;
+    }
+    return typeof auth.token === 'string' ? auth.token : undefined;
+  }
+
+  private resolveBodyUserId(payload: WsEnvelope['body']): string | undefined {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      return undefined;
+    }
+    const record = payload as Record<string, unknown>;
+    const innerPayload =
+      typeof record.type === 'string' && 'payload' in record
+        ? (record.payload as Record<string, unknown> | null)
+        : record;
+    const candidate = innerPayload?.userId;
+    return typeof candidate === 'string' ? candidate : undefined;
+  }
+
+  async handleConnection(socket: Socket) {
+    const token = this.resolveToken(socket);
+    if (!token) {
+      this.logger.warn('Missing auth token in socket handshake');
+      socket.disconnect(true);
+      return;
+    }
+
+    let userId: string;
+    try {
+      const verified = await verifyClerkJwt(token);
+      userId = verified.userId;
+    } catch (error) {
+      this.logger.warn({ error }, 'Failed to verify socket auth token');
+      socket.disconnect(true);
+      return;
+    }
+
     const sessionId = randomUUID();
-    const userIdQuery = socket.handshake.query.userId;
-    const userId = Array.isArray(userIdQuery) ? userIdQuery[0] : userIdQuery;
 
     socket.data.sessionId = sessionId;
-    socket.data.userId = typeof userId === 'string' ? userId : undefined;
+    socket.data.userId = userId;
     this.sessions.set(sessionId, socket);
     socket.emit('session.started', { sessionId, userId });
   }
@@ -67,27 +104,41 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (!userId) {
-        throw new Error('Missing userId query');
+        throw new Error('Missing verified userId');
       }
 
       this.logger.debug('Parsing WS envelope');
       const envelope: WsEnvelope = parseWsEnvelope(payload);
       this.logger.debug(`Envelope parsed: ${JSON.stringify(envelope)}`);
 
+      const bodyUserId = this.resolveBodyUserId(envelope.body);
+      if (bodyUserId && bodyUserId !== userId) {
+        throw new Error('UserId mismatch');
+      }
+
+      const bodyEnvelope = envelope.body as Record<string, unknown> | null;
+      const hasInnerEnvelope =
+        bodyEnvelope &&
+        typeof bodyEnvelope === 'object' &&
+        typeof bodyEnvelope.type === 'string' &&
+        'payload' in bodyEnvelope;
+      const messageType = hasInnerEnvelope ? (bodyEnvelope.type as string) : envelope.type;
+      const messagePayload = hasInnerEnvelope ? bodyEnvelope.payload : envelope.body;
+
       const kafkaEnvelope: EventKafkaEnvelope = {
         id: envelope.id,
         ts: envelope.ts,
-        type: envelope.type,
-        body: envelope.body,
+        type: messageType,
+        body: messagePayload,
         sessionId,
         userId,
-        messageType: envelope.type,
+        messageType: messageType,
         topic: kafkaConfig.eventsTopic,
         partition: 0,
         offset: 0,
       };
 
-      const body = envelope.body as Record<string, unknown> | null;
+      const body = messagePayload as Record<string, unknown> | null;
       const threadId =
         body && typeof body === 'object' && typeof body.threadId === 'string'
           ? body.threadId

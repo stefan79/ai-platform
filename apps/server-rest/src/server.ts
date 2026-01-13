@@ -9,7 +9,19 @@ import {
   createThreadMessagesResponse,
   createVersionResponse,
 } from '@ai-platform/protocol-rest';
+import { eventSchemas, parseEventPayload } from '@ai-platform/protocol-generated';
 import { createLogger } from './logger';
+import { verifyClerkJwt } from './auth/clerk-jwt';
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    auth?: {
+      userId: string;
+      token: string;
+      claims: Record<string, unknown>;
+    };
+  }
+}
 
 const dynamoConfig = {
   region: process.env.AWS_REGION ?? 'us-east-1',
@@ -47,9 +59,50 @@ export function buildServer(contextState: ContextState) {
     logger: createLogger(),
   });
 
+  const defaultOrigins = [
+    'http://localhost:4300',
+    'http://ai-platform.local:8080',
+    'https://ai-platform.local:8443',
+  ];
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+    : defaultOrigins;
+
   server.register(cors, {
-    origin: ['http://localhost:4300'],
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['authorization', 'content-type'],
+  });
+
+  const extractBearerToken = (header?: string): string | undefined => {
+    if (!header) {
+      return undefined;
+    }
+    const [scheme, token] = header.split(' ');
+    if (scheme?.toLowerCase() !== 'bearer' || !token) {
+      return undefined;
+    }
+    return token;
+  };
+
+  server.addHook('preHandler', async (request, reply) => {
+    if (!request.url.startsWith('/api/v1')) {
+      return;
+    }
+
+    const token = extractBearerToken(request.headers.authorization);
+    if (!token) {
+      request.log.warn({ path: request.url }, 'Missing bearer token');
+      return reply.status(401).send({ error: 'Unauthorized' });
+    }
+
+    try {
+      const { userId, claims } = await verifyClerkJwt(token);
+      request.auth = { userId, claims, token };
+    } catch (error) {
+      request.log.warn({ error, path: request.url }, 'Failed to verify JWT');
+      return reply.status(401).send({ error: 'Invalid token' });
+    }
   });
 
   server.get('/api/health', async (_request, reply) => {
@@ -72,7 +125,14 @@ export function buildServer(contextState: ContextState) {
   });
 
   server.get('/api/v1/users/:userId/threads/:threadId/messages', async (request, reply) => {
-    const { threadId } = request.params as { userId: string; threadId: string };
+    const { threadId, userId } = request.params as { userId: string; threadId: string };
+    if (request.auth?.userId !== userId) {
+      request.log.warn(
+        { path: request.url, userId, authUserId: request.auth?.userId },
+        'User mismatch for thread messages',
+      );
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
     const query = request.query as Partial<{
       limit: string;
       cursor: string;
@@ -105,25 +165,26 @@ export function buildServer(contextState: ContextState) {
 
     const items = (result.Items ?? []) as Array<{
       payload?: {
-        messageId: string;
-        authorId: string;
-        timestamp: number;
-        body: string;
+        message?: {
+          type?: string;
+          payload?: unknown;
+        };
       };
-      aggregateId?: string;
     }>;
 
     const messages = items
       .map((item) => {
-        if (!item.payload) {
+        const envelope = item.payload?.message;
+        if (!envelope?.type) {
           return null;
         }
+        if (!(envelope.type in eventSchemas)) {
+          throw new Error(`Unsupported message type: ${envelope.type}`);
+        }
+        const payload = parseEventPayload(envelope.type as never, envelope.payload);
         return {
-          messageId: item.payload.messageId,
-          threadId,
-          authorId: item.payload.authorId,
-          timestamp: item.payload.timestamp,
-          body: item.payload.body,
+          type: envelope.type,
+          payload,
         };
       })
       .filter((message): message is NonNullable<typeof message> => Boolean(message));

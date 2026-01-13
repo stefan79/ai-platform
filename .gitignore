@@ -38,6 +38,7 @@ testem.log
 /typings
 .dynamodb-data
 dynamodb-data
+/certs
 .codex
 
 # System Files
@@ -46,3 +47,4 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
+.env.local

@@ -23,7 +23,7 @@ export function parseCoreEnvelope(payload: unknown): CoreEnvelope {
 export const eventKafkaEnvelopeSchema = coreEnvelopeSchema
   .extend({
     sessionId: z.string(),
-    userId: z.string().uuid(),
+    userId: z.string(),
     messageType: coreMessageTypeSchema,
     topic: z.string(),
     partition: z.number().int().nonnegative(),

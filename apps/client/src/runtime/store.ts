@@ -3,11 +3,11 @@ import type {
   BootstrapSnapshot,
   ConnectionStatus,
   EventEnvelope,
+  MessageEnvelope,
   ThreadEvent,
   ThreadMessage,
   UiStatePatchPayload,
 } from './types';
-import { match } from 'ts-pattern';
 import { applyUiStatePatch, createDefaultUiState, mergeUiState } from './ui-state';
 
 type AppAction =
@@ -73,6 +73,46 @@ const createInitialState = (): AppState => ({
   composerLocked: false,
 });
 
+const toThreadMessage = (envelope: MessageEnvelope): ThreadMessage | null => {
+  if (envelope.type === 'user.message') {
+    const payload = envelope.payload as {
+      messageId: string;
+      threadId: string;
+      timestamp: number;
+      body: string;
+    };
+    return {
+      id: payload.messageId,
+      role: 'user',
+      timestamp: payload.timestamp,
+      body: payload.body,
+      status: 'complete',
+      threadId: payload.threadId,
+    };
+  }
+  if (envelope.type === 'assistant.message') {
+    const payload = envelope.payload as {
+      messageId: string;
+      responseTo: string;
+      threadId: string;
+      assistantId: string;
+      timestamp: number;
+      body: string;
+    };
+    return {
+      id: payload.messageId,
+      role: 'assistant',
+      timestamp: payload.timestamp,
+      body: payload.body,
+      status: 'complete',
+      responseTo: payload.responseTo,
+      assistantId: payload.assistantId,
+      threadId: payload.threadId,
+    };
+  }
+  return null;
+};
+
 const reduce = (state: AppState, action: AppAction): AppState => {
   switch (action.type) {
     case 'snapshot.loaded': {
@@ -129,7 +169,10 @@ const reduce = (state: AppState, action: AppAction): AppState => {
     case 'thread.event': {
       const event = action.event;
       if (event.kind === 'history') {
-        const sorted = [...event.messages].sort((left, right) => left.timestamp - right.timestamp);
+        const sorted = event.envelopes
+          .map((envelope) => toThreadMessage(envelope))
+          .filter((message): message is ThreadMessage => Boolean(message))
+          .sort((left, right) => left.timestamp - right.timestamp);
         return {
           ...state,
           messages: sorted,
@@ -137,87 +180,60 @@ const reduce = (state: AppState, action: AppAction): AppState => {
         };
       }
 
-      const payloads =
-        event.kind === 'batch' ? event.payloads : event.kind === 'single' ? [event.payload] : [];
+      const envelopes = event.kind === 'batch' ? event.envelopes : [event.envelope];
+      const messages = envelopes
+        .map((envelope) => toThreadMessage(envelope))
+        .filter((message): message is ThreadMessage => Boolean(message));
 
-      return match(event.payloadType)
-        .with('user.message', () => {
-          const userMessages: ThreadMessage[] = payloads.map((payload) => ({
-            id: payload.messageId,
-            role: 'user',
-            timestamp: payload.timestamp,
-            body: payload.body,
-            status: 'complete',
-            threadId: payload.threadId,
-          }));
-          const placeholders: ThreadMessage[] =
-            event.kind === 'single'
-              ? [
-                  {
-                    id: crypto.randomUUID(),
-                    role: 'assistant',
-                    timestamp: Date.now(),
-                    body: 'Waiting for assistant response…',
-                    status: 'pending',
-                    responseTo: payloads[0]?.messageId,
-                    threadId: payloads[0]?.threadId ?? '',
-                  },
-                ]
-              : [];
-          return {
-            ...state,
-            messages: [...state.messages, ...userMessages, ...placeholders],
-            composerLocked: event.kind === 'single' ? true : state.composerLocked,
-          };
-        })
-        .with('assistant.message', () => {
-          const updated = state.messages.map((message) => {
-            const matchPayload = payloads.find(
-              (payload) =>
-                message.role === 'assistant' &&
-                message.status === 'pending' &&
-                message.responseTo === payload.responseTo,
-            );
-            if (matchPayload) {
-              return {
-                id: matchPayload.messageId,
+      if (messages.length === 0) {
+        return state;
+      }
+
+      const userMessages = messages.filter((message) => message.role === 'user');
+      const assistantMessages = messages.filter((message) => message.role === 'assistant');
+
+      const nextMessages = [...state.messages, ...userMessages];
+      const placeholders =
+        event.kind === 'envelope' && userMessages.length > 0
+          ? [
+              {
+                id: crypto.randomUUID(),
                 role: 'assistant',
-                timestamp: matchPayload.timestamp,
-                body: matchPayload.body,
-                status: 'complete',
-                responseTo: matchPayload.responseTo,
-                assistantId: matchPayload.assistantId,
-                threadId: matchPayload.threadId,
-              } satisfies ThreadMessage;
-            }
-            return message;
-          });
-          const appended = payloads.filter(
-            (payload) => !updated.some((message) => message.id === payload.messageId),
-          );
-          const nextMessages = [
-            ...updated,
-            ...appended.map(
-              (payload) =>
-                ({
-                  id: payload.messageId,
-                  role: 'assistant',
-                  timestamp: payload.timestamp,
-                  body: payload.body,
-                  status: 'complete',
-                  responseTo: payload.responseTo,
-                  assistantId: payload.assistantId,
-                  threadId: payload.threadId,
-                }) satisfies ThreadMessage,
-            ),
-          ];
-          return {
-            ...state,
-            messages: nextMessages,
-            composerLocked: false,
-          };
-        })
-        .otherwise(() => state);
+                timestamp: Date.now(),
+                body: 'Waiting for assistant response…',
+                status: 'pending',
+                responseTo: userMessages[0].id,
+                threadId: userMessages[0].threadId,
+              } satisfies ThreadMessage,
+            ]
+          : [];
+
+      if (placeholders.length > 0) {
+        nextMessages.push(...placeholders);
+      }
+
+      const updated = nextMessages.map((message) => {
+        const matchPayload = assistantMessages.find(
+          (assistant) =>
+            message.role === 'assistant' &&
+            message.status === 'pending' &&
+            message.responseTo === assistant.responseTo,
+        );
+        if (matchPayload) {
+          return matchPayload;
+        }
+        return message;
+      });
+
+      const appended = assistantMessages.filter(
+        (assistant) => !updated.some((message) => message.id === assistant.id),
+      );
+
+      return {
+        ...state,
+        messages: [...updated, ...appended],
+        composerLocked: event.kind === 'envelope' ? userMessages.length > 0 : state.composerLocked,
+      };
     }
     default:
       return state;

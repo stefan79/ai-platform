@@ -31,11 +31,8 @@ export type ServerDetails = z.infer<typeof serverDetailsSchema>;
 
 export const threadMessageSchema = z
   .object({
-    messageId: z.string().uuid(),
-    threadId: z.string(),
-    authorId: z.string(),
-    timestamp: z.number().int().nonnegative(),
-    body: z.string(),
+    type: z.string(),
+    payload: z.unknown(),
   })
   .strict();
 

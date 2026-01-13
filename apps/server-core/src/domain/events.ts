@@ -19,10 +19,11 @@ export type DomainEventPayloadMap = {
   'user.profile-updated': { displayName?: string; avatarUrl?: string };
   'user.thread-added': { threadId: string };
   'thread.message-added': {
-    messageId: string;
     authorId: string;
-    timestamp: number;
-    body: string;
+    message: {
+      type: string;
+      payload: unknown;
+    };
   };
   'thread.title-updated': { title: string };
   'thread.metadata-updated': { key: string; value: string };
@@ -66,10 +67,13 @@ const userThreadAddedSchema = z
 
 const threadMessageAddedSchema = z
   .object({
-    messageId: z.string(),
     authorId: z.string(),
-    timestamp: z.number().int().nonnegative(),
-    body: z.string(),
+    message: z
+      .object({
+        type: z.string(),
+        payload: z.unknown(),
+      })
+      .strict(),
   })
   .strict();
 

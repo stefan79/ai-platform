@@ -25,14 +25,16 @@ export function MessageComposer() {
     if (!trimmed) return;
 
     threadBus.publish({
-      kind: 'single',
+      kind: 'envelope',
       threadId,
-      payloadType: 'user.message',
-      payload: {
-        messageId: crypto.randomUUID(),
-        threadId,
-        timestamp: Date.now(),
-        body: trimmed,
+      envelope: {
+        type: 'user.message',
+        payload: {
+          messageId: crypto.randomUUID(),
+          threadId,
+          timestamp: Date.now(),
+          body: trimmed,
+        },
       },
     });
     setDraft('');
